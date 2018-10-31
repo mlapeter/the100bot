@@ -15,7 +15,8 @@ client.registry
   .registerDefaultTypes()
   .registerGroups([
     ["general", "General Commands"],
-    ["second", "Your Second Command Group"]
+    ["group", "Group Commands"],
+    ["gamingsession", "Gaming Session Commands"]
   ])
   .registerDefaultGroups()
   .registerDefaultCommands()
