@@ -1,0 +1,23 @@
+{
+  "name": "the100bot",
+  "version": "1.0.0",
+  "description": "Official Discord Bot for The100.io",
+  "main": "index.js",
+  "engines": {
+    "node": "10.9.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "the100",
+    "discord",
+    "bot",
+    "the",
+    "100",
+    "lfg"
+  ],
+  "author": "mlapeter",
+  "license": "ISC"
+}
