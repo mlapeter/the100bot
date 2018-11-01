@@ -7,7 +7,11 @@ module.exports = class GamesCommand extends Command {
       name: "games",
       group: "group",
       memberName: "games",
-      description: "Returns a list of upcoming group gaming sessions."
+      description: "Returns a list of upcoming group gaming sessions.",
+      throttling: {
+        usages: 2,
+        duration: 60
+      }
     });
   }
 

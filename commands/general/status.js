@@ -7,7 +7,11 @@ module.exports = class MeowCommand extends Command {
       aliases: ["status"],
       group: "general",
       memberName: "the100status",
-      description: "Replies with a meow, kitty cat."
+      description: "Check The100bot status.",
+      throttling: {
+        usages: 2,
+        duration: 10
+      }
     });
   }
   async run(msg) {

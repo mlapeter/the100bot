@@ -1,12 +1,9 @@
 const { CommandoClient } = require("discord.js-commando");
 const path = require("path");
 
-// const Discord = require("discord.js");
-// const client = new Discord.Client();
-
 const client = new CommandoClient({
   commandPrefix: "!",
-  owner: "126736943311486976",
+  owner: process.env.OWNER_DISCORD_ID,
   invite: "https://discord.gg/dBZRVB9",
   disableEveryone: true
 });

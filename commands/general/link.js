@@ -6,7 +6,11 @@ module.exports = class LinkCommand extends Command {
       name: "link",
       group: "general",
       memberName: "link",
-      description: "Link your Discord account to The100.io."
+      description: "Link your Discord account to The100.io.",
+      throttling: {
+        usages: 4,
+        duration: 120
+      }
     });
   }
 
@@ -15,6 +19,7 @@ module.exports = class LinkCommand extends Command {
       msg.author.username
     }/#${msg.author.discriminator}`;
     console.log(content);
+    msg.react("💯");
     return msg.author.send(content);
   }
 };

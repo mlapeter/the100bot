@@ -10,6 +10,10 @@ module.exports = class JoinCommand extends Command {
       memberName: "join",
       description: "Joins specified gaming session",
       examples: ["join 132435"],
+      throttling: {
+        usages: 4,
+        duration: 120
+      },
       args: [
         {
           key: "gaming_session_id",
@@ -37,6 +41,11 @@ module.exports = class JoinCommand extends Command {
     const res = await fetch(link, { method: "POST" });
     const json = await res.json();
     console.log(json);
+    if (json.notice.includes("You just joined")) {
+      // msg.react("💯");
+    } else {
+      msg.react("💩");
+    }
     return msg.author.send(json.notice);
   }
 };
