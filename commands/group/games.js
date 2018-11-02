@@ -17,7 +17,7 @@ module.exports = class GamesCommand extends Command {
 
   async run(msg) {
     let content = `Listing Gaming Sessions for Guild Id: ${msg.guild.id}`;
-    let link = `http://pwn-staging.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
+    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
       msg.guild.id
     }`;
     console.log(content);

@@ -32,7 +32,7 @@ module.exports = class JoinCommand extends Command {
       msg.guild.id
     }`;
 
-    let link = `http://pwn-staging.herokuapp.com/api/v2/discordbots/join_gaming_session?guild_id=${
+    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/join_gaming_session?guild_id=${
       msg.guild.id
     }&username=${msg.author.username}&discriminator=${
       msg.author.discriminator
@@ -45,9 +45,11 @@ module.exports = class JoinCommand extends Command {
         Authorization: "Bearer " + process.env.THE100_API_TOKEN
       }
     });
-    console.log(res.status)
+    console.log(res.status);
     if (res.status !== 201) {
-      return msg.say("Not Authorized - make sure the bot creator is using the correct API Token.")
+      return msg.say(
+        "Not Authorized - make sure the bot creator is using the correct API Token."
+      );
     }
     const json = await res.json();
     console.log(json);

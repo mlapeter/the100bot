@@ -36,7 +36,7 @@ module.exports = class JoinCommand extends Command {
       msg.guild.id
     }`;
 
-    let link = `http://pwn-staging.herokuapp.com/api/v2/discordbots/create_gaming_session?guild_id=${
+    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/create_gaming_session?guild_id=${
       msg.guild.id
     }&username=${msg.author.username}&discriminator=${
       msg.author.discriminator
@@ -57,7 +57,7 @@ module.exports = class JoinCommand extends Command {
     }
     const json = await res.json();
     console.log(json);
-    let gaming_sessions_list_link = `http://pwn-staging.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
+    let gaming_sessions_list_link = `https://pwntastic.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
       msg.guild.id
     }`;
     if (json.notice.includes("Gaming Session Created!")) {
