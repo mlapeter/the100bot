@@ -5,7 +5,8 @@ const client = new CommandoClient({
   commandPrefix: "!",
   owner: process.env.OWNER_DISCORD_ID,
   invite: "https://discord.gg/dBZRVB9",
-  disableEveryone: true
+  disableEveryone: true,
+  unknownCommandResponse: false
 });
 
 client.registry
