@@ -42,10 +42,17 @@ module.exports = class JoinCommand extends Command {
       msg.author.discriminator
     }&message=${gaming_session_keywords}`;
     console.log(content);
-    const res = await fetch(link, { method: "POST" });
+    const res = await fetch(link, { method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + process.env.THE100_API_TOKEN
+    } });
+    console.log(res.status)
+    if (res.status !== 201) {
+      return msg.say("Not Authorized - make sure the bot creator is using the correct API Token.")
+    }
     const json = await res.json();
     console.log(json);
-
     let gaming_sessions_list_link = `http://pwn-staging.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
       msg.guild.id
     }`;

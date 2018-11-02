@@ -38,7 +38,17 @@ module.exports = class JoinCommand extends Command {
       msg.author.discriminator
     }&message=${gaming_session_id}`;
     console.log(content);
-    const res = await fetch(link, { method: "POST" });
+    const res = await fetch(link, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + process.env.THE100_API_TOKEN
+      }
+    });
+    console.log(res.status)
+    if (res.status !== 201) {
+      return msg.say("Not Authorized - make sure the bot creator is using the correct API Token.")
+    }
     const json = await res.json();
     console.log(json);
     if (json.notice.includes("You just joined")) {
