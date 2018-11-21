@@ -36,9 +36,11 @@ module.exports = class JoinCommand extends Command {
       msg.guild.id
     }`;
 
-    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/create_gaming_session?guild_id=${
-      msg.guild.id
-    }&username=${msg.author.username}&discriminator=${
+    let link = `${
+      process.env.THE100_API_BASE_URL
+    }discordbots/create_gaming_session?guild_id=${msg.guild.id}&username=${
+      msg.author.username
+    }&discriminator=${
       msg.author.discriminator
     }&message=${gaming_session_keywords}`;
     console.log(content);
@@ -57,9 +59,9 @@ module.exports = class JoinCommand extends Command {
     }
     const json = await res.json();
     console.log(json);
-    let gaming_sessions_list_link = `https://pwntastic.herokuapp.com/api/v2/discordbots/list_gaming_sessions?guild_id=${
-      msg.guild.id
-    }`;
+    let gaming_sessions_list_link = `${
+      process.env.THE100_API_BASE_URL
+    }discordbots/list_gaming_sessions?guild_id=${msg.guild.id}`;
     if (json.notice.includes("Gaming Session Created!")) {
       const response = await fetch(gaming_sessions_list_link, {
         method: "POST"

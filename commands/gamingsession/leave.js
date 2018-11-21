@@ -33,11 +33,11 @@ module.exports = class CreateCommand extends Command {
       }`
     );
 
-    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/leave_gaming_session?guild_id=${
-      msg.guild.id
-    }&username=${msg.author.username}&discriminator=${
-      msg.author.discriminator
-    }&message=${gaming_session_id}`;
+    let link = `${
+      process.env.THE100_API_BASE_URL
+    }discordbots/leave_gaming_session?guild_id=${msg.guild.id}&username=${
+      msg.author.username
+    }&discriminator=${msg.author.discriminator}&message=${gaming_session_id}`;
 
     const res = await fetch(link, {
       method: "POST",

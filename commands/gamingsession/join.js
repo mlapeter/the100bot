@@ -32,11 +32,11 @@ module.exports = class JoinCommand extends Command {
       msg.guild.id
     }`;
 
-    let link = `https://pwntastic.herokuapp.com/api/v2/discordbots/join_gaming_session?guild_id=${
-      msg.guild.id
-    }&username=${msg.author.username}&discriminator=${
-      msg.author.discriminator
-    }&message=${gaming_session_id}`;
+    let link = `${
+      process.env.THE100_API_BASE_URL
+    }discordbots/join_gaming_session?guild_id=${msg.guild.id}&username=${
+      msg.author.username
+    }&discriminator=${msg.author.discriminator}&message=${gaming_session_id}`;
     console.log(content);
     const res = await fetch(link, {
       method: "POST",
