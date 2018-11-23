@@ -32,6 +32,6 @@ For minor fixes and improvements, feel free to create a new branch, then submit 
 - You should now be able to type "!the100status" in your discord server and the bot should reply.
 - You should also be able to create a new game by typing for example "!create raid tomorrow at 9pm" and then view your upcoming games by typing "!games"
 
-Working? Great! Contact us in our discord: https://discord.gg/aVhkdHT and message @muhuhuhaha and we can generate a production api key so you can connect to The100.io. Your bot will then be able to create, join, and leave gaming sessions on behalf of your group members.
+Working? Great! Contact us in our discord: https://discord.gg/aVhkdHT and message @muhuhuhaha and we can whitelist your account so you can connect to to the production The100.io API. Your bot will then be able to create, join, and leave gaming sessions on behalf of your group members.
 
 Not Working? Not Great! Contact @muhuhuhaha or @FearBroner in our Discord and we'll try to get things sorted.
