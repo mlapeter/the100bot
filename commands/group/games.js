@@ -1,4 +1,6 @@
 const { Command } = require("discord.js-commando");
+const { RichEmbed } = require("discord.js");
+
 const fetch = require("node-fetch");
 
 module.exports = class GamesCommand extends Command {
@@ -33,8 +35,19 @@ module.exports = class GamesCommand extends Command {
       return msg.say(
         "Not Authorized - make sure the bot creator is using the correct API Token."
       );
+    } else {
+      const json = await res.json();
+      console.log(json);
+      msg.say(json.text);
+      json.attachments.forEach(function(attachment) {
+        console.log(attachment);
+        const embed = new RichEmbed()
+          .setTitle(attachment.title)
+          .setURL(attachment.title_link)
+          .setDescription(attachment.text)
+          .setColor(attachment.color);
+        msg.embed(embed);
+      });
     }
-    const json = await res.json();
-    console.log(json);
   }
 };
