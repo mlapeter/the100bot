@@ -39,7 +39,7 @@ module.exports = class GamesCommand extends Command {
       const json = await res.json();
       console.log(json);
       msg.say(json.text);
-      if (!json.attachments.length) {
+      if (!json.attachments || !json.attachments.length) {
         // No upcoming games
       } else {
         json.attachments.forEach(function(attachment) {
