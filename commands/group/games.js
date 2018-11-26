@@ -39,15 +39,19 @@ module.exports = class GamesCommand extends Command {
       const json = await res.json();
       console.log(json);
       msg.say(json.text);
-      json.attachments.forEach(function(attachment) {
-        console.log(attachment);
-        const embed = new RichEmbed()
-          .setTitle(attachment.title)
-          .setURL(attachment.title_link)
-          .setDescription(attachment.text)
-          .setColor(attachment.color);
-        msg.embed(embed);
-      });
+      if (!json.attachments.length) {
+        // No upcoming games
+      } else {
+        json.attachments.forEach(function(attachment) {
+          console.log(attachment);
+          const embed = new RichEmbed()
+            .setTitle(attachment.title)
+            .setURL(attachment.title_link)
+            .setDescription(attachment.text)
+            .setColor(attachment.color);
+          msg.embed(embed);
+        });
+      }
     }
   }
 };
