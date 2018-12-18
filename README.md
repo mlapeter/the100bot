@@ -18,7 +18,7 @@ For minor fixes and improvements, feel free to create a new branch, then submit 
    - OWNER_DISCORD_ID is your Discord user id. You can find this by right clicking your username and select "Copy ID"
    - THE100_API_TOKEN can be generated from your edit profile page. For testing, you can create an account on our staging server at https://pwn-staging.herokuapp.com and generate it there.
    - THE100_API_BASE_URL is the API url. For testing, point it to our staging server. The full base url is `"https://pwn-staging.herokuapp.com/api/v2/"`. If you later point it to The100.io, make sure you also generate a new API token from your real account on The100.io.
-- Run `npm init`
+- Run `npm init`, Make sure you change the github url if you are going to push to Github
 - Run `npm install`
 - Run `npm rebuild`
 - On our staging site, create a new group: http://pwn-staging.herokuapp.com/groups/new

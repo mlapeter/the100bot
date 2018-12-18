@@ -29,10 +29,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mlapeter/the100bot.git"
+    "url": "git+https://github.com/mattaster/the100bot.git"
   },
   "bugs": {
-    "url": "https://github.com/mlapeter/the100bot/issues"
+    "url": "https://github.com/mattaster/the100bot/issues"
   },
-  "homepage": "https://github.com/mlapeter/the100bot#readme"
+  "homepage": "https://github.com/mattaster/the100bot#readme"
 }
