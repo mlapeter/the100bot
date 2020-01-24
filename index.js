@@ -1,5 +1,7 @@
 const { CommandoClient } = require("discord.js-commando");
 const path = require("path");
+require('dotenv').config();
+
 
 const client = new CommandoClient({
   commandPrefix: "!",
@@ -22,7 +24,11 @@ client.registry
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}! (${client.user.id})`);
-  client.user.setActivity("with Commando");
+  client.user.setActivity("with The100.io");
 });
-client.on("error", console.error);
+client.on('error', error => {
+  console.log("Client Error");
+  console.error('The WebSocket encountered an error:', error);
+});
+
 client.login(process.env.DISCORD_BOT_TOKEN);

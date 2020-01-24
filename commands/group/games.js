@@ -21,7 +21,7 @@ module.exports = class GamesCommand extends Command {
     let content = `Listing Gaming Sessions for Guild Id: ${msg.guild.id}`;
     let link = `${
       process.env.THE100_API_BASE_URL
-    }discordbots/list_gaming_sessions?guild_id=${msg.guild.id}`;
+      }discordbots/list_gaming_sessions?guild_id=${msg.guild.id}`;
     console.log(content);
     const res = await fetch(link, {
       method: "POST",
@@ -32,6 +32,9 @@ module.exports = class GamesCommand extends Command {
     });
     console.log(res.status);
     if (res.status !== 200) {
+      console.log("Games.js Auth Error")
+      console.log(res);
+
       return msg.say(
         "Not Authorized - make sure the bot creator is using the correct API Token."
       );
@@ -42,7 +45,7 @@ module.exports = class GamesCommand extends Command {
       if (!json.attachments || !json.attachments.length) {
         // No upcoming games
       } else {
-        json.attachments.forEach(function(attachment) {
+        json.attachments.forEach(function (attachment) {
           console.log(attachment);
           const embed = new RichEmbed()
             .setTitle(attachment.title)
