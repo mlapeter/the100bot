@@ -1,4 +1,5 @@
-const { CommandoClient } = require("discord.js-commando");
+const sqlite = require('sqlite');
+const { CommandoClient, SQLiteProvider } = require("discord.js-commando");
 const path = require("path");
 require('dotenv').config();
 
@@ -9,6 +10,10 @@ const client = new CommandoClient({
   invite: "https://discord.gg/dBZRVB9",
   disableEveryone: true,
   unknownCommandResponse: false
+});
+
+sqlite.open(path.join(__dirname, "settings.sqlite3")).then((db) => {
+  client.setProvider(new SQLiteProvider(db));
 });
 
 client.registry
