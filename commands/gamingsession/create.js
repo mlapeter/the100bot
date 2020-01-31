@@ -34,96 +34,57 @@ module.exports = class JoinCommand extends Command {
   }
 
   // Todo:
-  // Dry up code
   // Make game default to user or group game
   // Add error handling
   // 
 
 
   async run(msg, { game, activity, time }) {
-    const emojiHash = { '1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6, '8️⃣': 7, '9️⃣': 8 }
 
-    // SELECT GAME //
-
+    // USER INPUTS GAME STRING //
     let json = await api.postAction({ action: 'find_games', msg: msg, body: { game } })
 
+    // SELECT GAME //
     const gamesEmbed = await this.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
-
-    let selectedGame = null
-
-    try {
-      let filter = (reaction, user) => user.id === msg.author.id
-      let userReactions = await gamesEmbed.awaitReactions(filter, { max: 1, time: 30000, errors: ['time'] })
-      let reaction = userReactions.first();
-      let activityIndex = emojiHash[reaction.emoji.name]
-
-      selectedGame = json.results.string_results[activityIndex]
-
-    } catch (e) {
-      console.log("Error:")
-      console.log(e)
-    }
+    const selectedGame = await this.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
     await gamesEmbed.delete();
 
 
+    // USER INPUTS ACTIVITY //
+    const activitiesListEmbed = await this.embedText(msg, selectedGame, "What activity? ex 'last wish raid' or 'gambit'")
+    const activityString = await this.getTextResponse(msg)
+    json = await api.postAction({ action: 'find_activities', msg: msg, body: { activity: activityString, game: selectedGame } })
+    await activitiesListEmbed.delete();
+
 
     // SELECT ACTIVITY //
-
-    const whichActivityEmbed = await this.embedText(msg, selectedGame, "What activity? ex 'last wish raid' or 'gambit'")
-
-    let pickedActivity = await this.getTextResponse(msg)
-
-    json = await api.postAction({ action: 'find_activities', msg: msg, body: { activity: pickedActivity, game: selectedGame } })
-
     const activitiesEmbed = await this.embedTextAndEmojis(msg, "Select Activity:", json.results.numbered_results, json.results.numbered_emojis)
-
-    let selectedActivity = null
-    try {
-      const filter = (reaction, user) => user.id === msg.author.id
-      const userReactions = await activitiesEmbed.awaitReactions(filter, { max: 1, time: 30000, errors: ['time'] })
-      const reaction = userReactions.first();
-      const activityIndex = emojiHash[reaction.emoji.name]
-      selectedActivity = json.results.numbered_results[activityIndex]
-    } catch (e) {
-      console.log("Error:")
-      console.log(e)
-    }
+    const selectedActivity = await this.getEmojiResponse(msg, activitiesEmbed, json.results.string_results)
     await activitiesEmbed.delete();
 
-    if (!selectedActivity) {
-      return msg.say(
-        "Game Creation Canceled."
-      );
-    }
 
-    // SELECT TIME //
-
+    // USER INPUTS TIME //
     const timeEmbed = await this.embedText(msg, selectedActivity, "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
-
-    let startTime = await this.getTextResponse(msg)
-
+    const startTime = await this.getTextResponse(msg)
     await timeEmbed.delete()
 
-    const descriptionEmbed = await this.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none':")
 
+    // USER INPUTS DESCRIPTION //
+    const descriptionEmbed = await this.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none':")
     let description = await this.getTextResponse(msg)
     description = description.replace("none", "")
-
     await descriptionEmbed.delete()
 
+    // CREATE GAMING SESSION //
     const loadingEmbed = await this.embedText(msg, "Creating Gaming Session...", "")
-
     setTimeout(function () { loadingEmbed.delete() }, 2000);
 
     const createGameMessage = selectedActivity + ' "' + description + '"'
     const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { message: createGameMessage, time: startTime } })
 
-    let gaming_sessions_list_link = `${
-      process.env.THE100_API_BASE_URL
-      }discordbots/list_gaming_sessions?guild_id=${msg.guild.id}`;
-
+    // LIST GAMING SESSIONS //
     if (createGameJson.notice.includes("Gaming Session Created!")) {
-      const response = await api.post(gaming_sessions_list_link)
+      await api.postAction({ action: 'list_gaming_sessions', msg: msg, body: {} })
     } else {
       msg.react("💩");
     }
@@ -132,9 +93,30 @@ module.exports = class JoinCommand extends Command {
 
   async getTextResponse(msg) {
     const filter = m => m.author.id === msg.author.id
-    const responses = await msg.channel.awaitMessages(filter, { max: 1, time: 20000, errors: ['time'] })
+    const responses = await msg.channel.awaitMessages(filter, { max: 1, time: 40000, errors: ['time'] })
     const response = responses.first().content;
     return response
+  }
+
+  async getEmojiResponse(msg, embed, results) {
+    const emojiHash = { '1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6, '8️⃣': 7, '9️⃣': 8 }
+
+    let filter = (reaction, user) => user.id === msg.author.id
+    let userReactions = await embed.awaitReactions(filter, { max: 1, time: 30000, errors: ['time'] })
+    let reaction = userReactions.first();
+    let activityIndex = emojiHash[reaction.emoji.name]
+    console.log("getEmojiResponse: ")
+    console.log(activityIndex)
+    console.log(results)
+    console.log(results[activityIndex])
+    const selected = results[activityIndex]
+
+    if (!selected) {
+      return msg.say(
+        "Game Creation Canceled."
+      );
+    }
+    return selected
   }
 
   async embedText(msg, title, description) {

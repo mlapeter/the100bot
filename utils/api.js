@@ -37,8 +37,6 @@ module.exports = class Api {
       ...body
     }
 
-    console.log(data)
-
     const res = await this.post(url, data)
 
     if (res.status !== 201) {
