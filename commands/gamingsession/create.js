@@ -23,10 +23,16 @@ module.exports = class JoinCommand extends Command {
         duration: 120
       },
       args: [
+        // {
+        //   key: "game",
+        //   prompt:
+        //     "Type part of the game name. ex 'destiny', 'd2', 'grand theft'",
+        //   type: "string"
+        // },
         {
-          key: "game",
+          key: "activity",
           prompt:
-            "Type part of the game name. ex 'destiny', 'd2', 'grand theft'",
+            "Type part of the Destiny 2 activity like `last wish raid` or `gambit`. To pick a different game, type `game` and part of the game name.",
           type: "string"
         },
       ]
@@ -41,20 +47,40 @@ module.exports = class JoinCommand extends Command {
 
   async run(msg, { game, activity, time }) {
 
-    // USER INPUTS GAME STRING //
-    let json = await api.postAction({ action: 'find_games', msg: msg, body: { game } })
+    // // USER INPUTS GAME STRING //
+    // let json = await api.postAction({ action: 'find_games', msg: msg, body: { game } })
 
-    // SELECT GAME //
-    const gamesEmbed = await this.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
-    const selectedGame = await this.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
-    await gamesEmbed.delete();
+    // // SELECT GAME //
+    // const gamesEmbed = await this.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
+    // const selectedGame = await this.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
+    // await gamesEmbed.delete();
 
+
+    let json = null
+    const selectedGame = "Destiny 2"
 
     // USER INPUTS ACTIVITY //
-    const activitiesListEmbed = await this.embedText(msg, selectedGame, "What activity? ex 'last wish raid' or 'gambit'")
-    const activityString = await this.getTextResponse(msg)
-    json = await api.postAction({ action: 'find_activities', msg: msg, body: { activity: activityString, game: selectedGame } })
-    await activitiesListEmbed.delete();
+
+    if (activity.includes("game")) {
+
+      // USER INPUTS GAME STRING //
+      console.log("SWITCHING GAME")
+      activity = activity.replace("game", "")
+      json = await api.postAction({ action: 'find_games', msg: msg, body: { game: activity } })
+
+
+      // SELECT GAME //
+      const gamesEmbed = await this.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
+      const selectedGame = await this.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
+      await gamesEmbed.delete();
+
+      const activitiesListEmbed = await this.embedText(msg, selectedGame, "What activity? ex 'last wish raid' or 'gambit'.")
+      activity = await this.getTextResponse(msg)
+      await activitiesListEmbed.delete();
+    }
+
+    // SEARCH ACTIVITIES //
+    json = await api.postAction({ action: 'find_activities', msg: msg, body: { activity: activity, game: selectedGame } })
 
 
     // SELECT ACTIVITY //
@@ -74,6 +100,7 @@ module.exports = class JoinCommand extends Command {
     let description = await this.getTextResponse(msg)
     description = description.replace("none", "")
     await descriptionEmbed.delete()
+
 
     // CREATE GAMING SESSION //
     const loadingEmbed = await this.embedText(msg, "Creating Gaming Session...", "")
@@ -130,10 +157,15 @@ module.exports = class JoinCommand extends Command {
 
   async embedTextAndEmojis(msg, title, description, emojis) {
     const embed = await this.embedText(msg, title, description)
-
     emojis.forEach(async emoji => {
-      await embed.react('1️⃣')
-      embed.react(emoji)
+      try {
+        await embed.react('1️⃣')
+        embed.react(emoji)
+        console.log(emoji)
+      } catch (e) {
+        console.log("Emoji error: ")
+        console.log(e)
+      }
     });
 
     return embed
