@@ -4,6 +4,8 @@ const path = require("path");
 require('dotenv').config();
 
 
+
+
 const client = new CommandoClient({
   commandPrefix: "!",
   owner: process.env.OWNER_DISCORD_ID,
