@@ -37,7 +37,7 @@ module.exports = class JoinCommand extends Command {
     });
   }
   async run(msg, { gaming_session_keywords, time }) {
-    console.log(msg.content);
+    console.log(gaming_session_keywords);
     let content = `${msg.author.username}#${
       msg.author.discriminator
       } Creating Gaming Session with keywords:${msg.content} in Guild ID: ${
@@ -50,7 +50,7 @@ module.exports = class JoinCommand extends Command {
       msg.author.username
       }&discriminator=${
       msg.author.discriminator
-      }&message=${msg.content}&time=${time}`;
+      }&message=${gaming_session_keywords}&time=${time}`;
     console.log(content);
     const res = await fetch(link, {
       method: "POST",

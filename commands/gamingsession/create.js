@@ -21,9 +21,9 @@ module.exports = class JoinCommand extends Command {
       },
       args: [
         {
-          key: "activity",
+          key: "game",
           prompt:
-            "Type the activity. ex 'last wish raid'",
+            "Type the game. ex 'destiny 2', 'grand theft auto 5",
           type: "string"
         },
       ]
@@ -31,17 +31,17 @@ module.exports = class JoinCommand extends Command {
   }
 
 
-  async run(msg, { activity, time }) {
+  async run(msg, { game, activity, time }) {
     const emojiHash = { '1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6, '8️⃣': 7, '9️⃣': 8 }
 
     let link = `${
       process.env.THE100_API_BASE_URL
-      }discordbots/find_activities?guild_id=${msg.guild.id}&username=${
+      }discordbots/find_games?guild_id=${msg.guild.id}&username=${
       msg.author.username
       }&discriminator=${
       msg.author.discriminator
-      }&message=${activity}`;
-    const res = await fetch(link, {
+      }&message=${game}`;
+    let res = await fetch(link, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +55,75 @@ module.exports = class JoinCommand extends Command {
         "Not Authorized - make sure the bot creator is using the correct API Token."
       );
     }
-    const json = await res.json();
+    let json = await res.json();
+
+    const embed0 = new RichEmbed()
+      .setTitle("Select Game:")
+      .setDescription(json.results.numbered_results)
+      .setColor(0x00ae86);
+    const gamesEmbed = await msg.embed(embed0)
+
+    json.results.numbered_emojis.forEach(async emoji => {
+      await gamesEmbed.react('1️⃣')
+      gamesEmbed.react(emoji)
+    });
+
+    let selectedGame = null
+    try {
+      let filter = (reaction, user) => user.id === msg.author.id
+      let userReactions = await gamesEmbed.awaitReactions(filter, { max: 1, time: 30000, errors: ['time'] })
+      let reaction = userReactions.first();
+      let activityIndex = emojiHash[reaction.emoji.name]
+
+      selectedGame = json.results.string_results[activityIndex]
+      console.log("selectedGame: ")
+      console.logselectedGame()
+    } catch (e) {
+      console.log("Error:")
+      console.log(e)
+    }
+    await gamesEmbed.delete();
+
+
+
+    // SELECT ACTIVITY //
+
+    const embed1 = new RichEmbed()
+      .setTitle(selectedGame)
+      .setDescription("What activity? ex 'last wish raid' or 'gambit'")
+      .setColor(0x00ae86);
+    const whichActivityEmbed = await msg.embed(embed1)
+
+    const filter2 = m => m.author.id === msg.author.id
+    const activities = await msg.channel.awaitMessages(filter2, { max: 1, time: 60000, errors: ['time'] })
+    const pickedActivity = activities.first();
+    console.log("pickedActivity: ")
+    console.log(pickedActivity.content)
+
+
+    link = `${
+      process.env.THE100_API_BASE_URL
+      }discordbots/find_activities?guild_id=${msg.guild.id}&username=${
+      msg.author.username
+      }&discriminator=${
+      msg.author.discriminator
+      }&activity=${encodeURI(pickedActivity.content)}&game=${encodeURI(selectedGame)}`;
+    res = await fetch(link, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + process.env.THE100_API_TOKEN
+      }
+    });
+
+    console.log(res.status);
+    if (res.status !== 201) {
+      return msg.say(
+        "Not Authorized - make sure the bot creator is using the correct API Token."
+      );
+    }
+    json = await res.json();
+    console.log(json)
 
     const embed = new RichEmbed()
       .setTitle("Select Activity:")
@@ -87,13 +155,14 @@ module.exports = class JoinCommand extends Command {
       );
     }
 
+    // SELECT TIME //
     const embed2 = new RichEmbed()
       .setTitle(selectedActivity)
       .setDescription("What time? ex 'tonight at 7pm' or '11am 2/15/20'")
       .setColor(0x00ae86);
     const timeEmbed = await msg.embed(embed2)
 
-    const filter2 = m => m.author.id === msg.author.id
+    // const filter2 = m => m.author.id === msg.author.id
     const startTimes = await msg.channel.awaitMessages(filter2, { max: 1, time: 60000, errors: ['time'] })
     const startTime = startTimes.first();
 
@@ -110,10 +179,6 @@ module.exports = class JoinCommand extends Command {
     console.log(description.content)
     description = description.content.replace("none", "")
 
-
-    // console.log(description)
-    // console.log(selectedActivity)
-    // console.log(startTime)
 
     await descriptionEmbed.delete()
     const embed4 = new RichEmbed()
@@ -158,7 +223,7 @@ module.exports = class JoinCommand extends Command {
     } else {
       msg.react("💩");
     }
-    // return msg.author.send(createGameJson.notice);
+    return msg.author.send(createGameJson.notice);
   }
 
 };
