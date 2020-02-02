@@ -31,7 +31,7 @@ module.exports = class GamesCommand extends Command {
       }
     });
     console.log(res.status);
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       console.log("Games.js Auth Error")
       console.log(res);
 
