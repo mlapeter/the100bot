@@ -114,7 +114,7 @@ module.exports = class JoinCommand extends Command {
   async getTextResponse(msg) {
     try {
       const filter = m => m.author.id === msg.author.id
-      const responses = await msg.channel.awaitMessages(filter, { max: 1, time: 20000, errors: ['time'] })
+      const responses = await msg.channel.awaitMessages(filter, { max: 1, time: 45000, errors: ['time'] })
       const response = responses.first().content;
       if (response && response == "cancel") { return false }
       return response
@@ -134,7 +134,7 @@ module.exports = class JoinCommand extends Command {
       const emojiHash = { '1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6, '8️⃣': 7, '9️⃣': 8 }
 
       let filter = (reaction, user) => user.id === msg.author.id
-      let userReactions = await embed.awaitReactions(filter, { max: 1, time: 20000, errors: ['time'] })
+      let userReactions = await embed.awaitReactions(filter, { max: 1, time: 45000, errors: ['time'] })
       console.log("userReactions: ")
       console.log(userReactions)
 
