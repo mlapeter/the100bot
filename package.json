@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon --exec node index.js"
   },
   "keywords": [
     "the100",
@@ -25,7 +25,11 @@
     "discord.js-commando": "0.10.0",
     "dotenv": "7.0.0",
     "eslint": "5.8.0",
+    "lodash": "4.17.15",
     "node-fetch": "2.2.0",
     "sqlite": "3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.2"
   }
 }

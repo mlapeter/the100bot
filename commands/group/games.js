@@ -31,12 +31,12 @@ module.exports = class GamesCommand extends Command {
       }
     });
     console.log(res.status);
-    if (res.status !== 200) {
+    if (res.status !== 201) {
       console.log("Games.js Auth Error")
       console.log(res);
 
       return msg.say(
-        "Not Authorized - make sure the bot creator is using the correct API Token."
+        "Not Authorized! - make sure the bot creator is using the correct API Token."
       );
     } else {
       const json = await res.json();
