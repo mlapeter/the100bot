@@ -1,5 +1,6 @@
 const { Command } = require("discord.js-commando");
-const fetch = require("node-fetch");
+const Api = require('../../utils/api')
+const api = new Api
 
 module.exports = class JoinCommand extends Command {
   constructor(client) {
@@ -25,34 +26,9 @@ module.exports = class JoinCommand extends Command {
     });
   }
   async run(msg, { gaming_session_id }) {
-    console.log(msg.content);
-    let content = `${msg.author.username}#${
-      msg.author.discriminator
-    } Joining Gaming Session ID:${gaming_session_id} in Guild ID: ${
-      msg.guild.id
-    }`;
 
-    let link = `${
-      process.env.THE100_API_BASE_URL
-    }discordbots/join_gaming_session?guild_id=${msg.guild.id}&username=${
-      msg.author.username
-    }&discriminator=${msg.author.discriminator}&message=${gaming_session_id}`;
-    console.log(content);
-    const res = await fetch(link, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + process.env.THE100_API_TOKEN
-      }
-    });
-    console.log(res.status);
-    if (res.status !== 201) {
-      return msg.say(
-        "Not Authorized - make sure the bot creator is using the correct API Token."
-      );
-    }
-    const json = await res.json();
-    console.log(json);
+    const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id } })
+
     if (json.notice.includes("You just joined")) {
       // msg.react("💯");
     } else {

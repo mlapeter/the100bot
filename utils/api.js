@@ -32,6 +32,7 @@ module.exports = class Api {
 
     let data = {
       guild_id: msg.guild.id,
+      discord_id: msg.author.id,
       username: msg.author.username,
       discriminator: msg.author.discriminator,
       ...body
