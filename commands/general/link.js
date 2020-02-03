@@ -1,4 +1,6 @@
 const { Command } = require("discord.js-commando");
+const Api = require('../../utils/api')
+const api = new Api
 
 module.exports = class LinkCommand extends Command {
   constructor(client) {
@@ -15,9 +17,20 @@ module.exports = class LinkCommand extends Command {
   }
 
   run(msg) {
-    let content = `Click here to link your account: https://the100.io/linkdiscord/${encodeURIComponent(
-      msg.author.username)
-      }/${msg.author.discriminator}`;
+    console.log(msg.author)
+    // const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id } })
+
+    // if (json.notice.includes("You just joined")) {
+    //   // msg.react("💯");
+    // } else {
+    //   msg.react("💩");
+    // }
+    // return msg.author.send(json.notice);
+
+    console.log("LINKING")
+
+    let content = `Click here to link your account!!: https://the100.io/linkdiscord/${encodeURIComponent(
+      msg.author.id)}`;
     console.log(content);
     msg.react("💯");
     return msg.author.send(content);
