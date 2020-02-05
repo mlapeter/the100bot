@@ -4,7 +4,6 @@ const fetch = require("node-fetch");
 const _ = require('lodash');
 const Api = require('../../utils/api')
 const api = new Api
-
 const DiscordApi = require('../../utils/discordApi')
 const discordApi = new DiscordApi
 
@@ -102,18 +101,18 @@ module.exports = class JoinCommand extends Command {
 
     const createGameMessage = selectedActivity + ' "' + description + '"'
     const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { game: selectedGame, message: createGameMessage, time: startTime } })
-    const { notice, gaming_session } = createGameJson
+
 
     // EMBED RETURNED GAMING SESSION //
+    const { notice, gaming_session } = createGameJson
     if (notice.includes("Gaming Session Created!")) {
       msg.say(`*${msg.author}* created:`)
       await discordApi.embedGamingSession(msg, gaming_session)
     } else {
       msg.react("💩");
+      return msg.author.send(notice);
     }
-    return msg.author.send(notice);
   }
-
 
 
 };

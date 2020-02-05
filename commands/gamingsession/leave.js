@@ -30,7 +30,7 @@ module.exports = class CreateCommand extends Command {
     const json = await api.postAction({ action: 'leave_gaming_session', msg: msg, body: { message: gaming_session_id } })
 
     if (json.notice.includes("Game left")) {
-      // msg.react("💯");
+      msg.react("💯");
     } else {
       msg.react("💩");
     }

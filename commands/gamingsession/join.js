@@ -1,6 +1,8 @@
 const { Command } = require("discord.js-commando");
 const Api = require('../../utils/api')
 const api = new Api
+const DiscordApi = require('../../utils/discordApi')
+const discordApi = new DiscordApi
 
 module.exports = class JoinCommand extends Command {
   constructor(client) {
@@ -28,12 +30,14 @@ module.exports = class JoinCommand extends Command {
   async run(msg, { gaming_session_id }) {
 
     const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id } })
+    const { notice, gaming_session } = json
 
-    if (json.notice.includes("You just joined")) {
-      // msg.react("💯");
+    if (notice.includes("You just joined")) {
+      msg.say(`*${msg.author}* joined:`)
+      await discordApi.embedGamingSession(msg, gaming_session)
     } else {
       msg.react("💩");
+      return msg.author.send(json.notice);
     }
-    return msg.author.send(json.notice);
   }
 };
