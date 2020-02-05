@@ -37,6 +37,9 @@ module.exports = class Api {
 
     const res = await this.post(url, data)
 
+    console.log("********** api.js *******************")
+    console.log(res)
+
     if (res.status !== 201) {
       return msg.say(
         "Not Authorized - make sure the bot creator is using the correct API Token."
