@@ -5,6 +5,9 @@ const _ = require('lodash');
 const Api = require('../../utils/api')
 const api = new Api
 
+const DiscordApi = require('../../utils/discordApi')
+const discordApi = new DiscordApi
+
 module.exports = class JoinCommand extends Command {
   constructor(client) {
     super(client, {
@@ -51,8 +54,8 @@ module.exports = class JoinCommand extends Command {
 
 
       // SELECT GAME //
-      const gamesEmbed = await this.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
-      selectedGame = await this.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
+      const gamesEmbed = await discordApi.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
+      selectedGame = await discordApi.getEmojiResponse(msg, gamesEmbed, json.results.string_results)
       await gamesEmbed.delete();
       if (!selectedGame) { return }
 
@@ -61,8 +64,8 @@ module.exports = class JoinCommand extends Command {
       const example1 = _.sample(sampleActivities.results.all_activities);
       const example2 = _.sample(sampleActivities.results.all_activities);
 
-      const activitiesListEmbed = await this.embedText(msg, selectedGame, `What activity? ex '${example1}' or '${example2}'.`)
-      activity = await this.getTextResponse(msg)
+      const activitiesListEmbed = await discordApi.embedText(msg, selectedGame, `What activity? ex '${example1}' or '${example2}'.`)
+      activity = await discordApi.getTextResponse(msg)
       await activitiesListEmbed.delete();
       if (!activity) { return }
     }
@@ -73,110 +76,44 @@ module.exports = class JoinCommand extends Command {
 
 
     // SELECT ACTIVITY //
-    const activitiesEmbed = await this.embedTextAndEmojis(msg, "Select Activity:", json.results.numbered_results, json.results.numbered_emojis)
-    const selectedActivity = await this.getEmojiResponse(msg, activitiesEmbed, json.results.string_results)
+    const activitiesEmbed = await discordApi.embedTextAndEmojis(msg, "Select Activity:", json.results.numbered_results, json.results.numbered_emojis)
+    const selectedActivity = await discordApi.getEmojiResponse(msg, activitiesEmbed, json.results.string_results)
     await activitiesEmbed.delete();
     if (!selectedActivity) { return }
 
 
     // USER INPUTS TIME //
-    const timeEmbed = await this.embedText(msg, selectedActivity, "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
-    const startTime = await this.getTextResponse(msg)
+    const timeEmbed = await discordApi.embedText(msg, selectedActivity, "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
+    const startTime = await discordApi.getTextResponse(msg)
     await timeEmbed.delete()
     if (!startTime) { return }
 
 
     // USER INPUTS DESCRIPTION //
-    const descriptionEmbed = await this.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none':")
-    let description = await this.getTextResponse(msg)
+    const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none':")
+    let description = await discordApi.getTextResponse(msg)
     description = description.replace("none", "")
     await descriptionEmbed.delete()
 
 
     // CREATE GAMING SESSION //
-    const loadingEmbed = await this.embedText(msg, "Creating Gaming Session...", "")
+    const loadingEmbed = await discordApi.embedText(msg, "Creating Gaming Session...", "")
     setTimeout(function () { loadingEmbed.delete() }, 2000);
 
     const createGameMessage = selectedActivity + ' "' + description + '"'
     const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { game: selectedGame, message: createGameMessage, time: startTime } })
+    const { notice, gaming_session } = createGameJson
 
-    // LIST GAMING SESSIONS //
-    if (createGameJson.notice.includes("Gaming Session Created!")) {
-      await api.postAction({ action: 'list_gaming_sessions', msg: msg, body: {} })
+    // EMBED RETURNED GAMING SESSION //
+    if (notice.includes("Gaming Session Created!")) {
+      msg.say(`*${msg.author}* created:`)
+      await discordApi.embedGamingSession(msg, gaming_session)
     } else {
       msg.react("💩");
     }
-    return msg.author.send(createGameJson.notice);
-  }
-
-  async getTextResponse(msg) {
-    try {
-      const filter = m => m.author.id === msg.author.id
-      const responses = await msg.channel.awaitMessages(filter, { max: 1, time: 45000, errors: ['time'] })
-      const response = responses.first().content;
-      if (response && response == "cancel") { return false }
-      return response
-    } catch (e) {
-      console.log("getTextResponse error:")
-      console.log(e)
-      msg.say(
-        "Game Creation Canceled."
-      );
-      return false
-    }
-  }
-
-  async getEmojiResponse(msg, embed, results) {
-    try {
-      console.log("getEmojiResponse")
-      const emojiHash = { '1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6, '8️⃣': 7, '9️⃣': 8 }
-
-      let filter = (reaction, user) => user.id === msg.author.id
-      let userReactions = await embed.awaitReactions(filter, { max: 1, time: 45000, errors: ['time'] })
-      console.log("userReactions: ")
-      console.log(userReactions)
-
-      let reaction = userReactions.first();
-      let activityIndex = emojiHash[reaction.emoji.name]
-      console.log("getEmojiResponse: ")
-      console.log(activityIndex)
-      console.log(results)
-      console.log(results[activityIndex])
-      const selected = results[activityIndex]
-      return selected
-
-    } catch (e) {
-      console.log("getEmojiResponse error:")
-      console.log(e)
-      msg.say(
-        "Game Creation Canceled."
-      );
-      return false
-    }
-  }
-
-  async embedText(msg, title, description) {
-    const embed = new RichEmbed()
-      .setTitle(title)
-      .setDescription(description)
-      .setColor(0x00ae86);
-    return await msg.embed(embed)
+    return msg.author.send(notice);
   }
 
 
-  async embedTextAndEmojis(msg, title, description, emojis) {
-    const embed = await this.embedText(msg, title, description)
-    emojis.forEach(async emoji => {
-      try {
-        await embed.react('1️⃣')
-        embed.react(emoji)
-        console.log(emoji)
-      } catch (e) {
-        console.log("Emoji error: ")
-        console.log(e)
-      }
-    });
 
-    return embed
-  }
 };

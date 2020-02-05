@@ -1,11 +1,8 @@
+const { RichEmbed } = require("discord.js");
 const fetch = require("node-fetch");
 
 
 module.exports = class Api {
-  async test(params) {
-    console.log("testing")
-    console.log(params)
-  }
 
   async post(url, data) {
     console.log("LINK: ")
