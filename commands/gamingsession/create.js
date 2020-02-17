@@ -38,11 +38,14 @@ module.exports = class JoinCommand extends Command {
   async run(msg, { activity }) {
     let json = null
     let selectedGame = "Destiny 2"
+    let publicGame = false
 
     // USER INPUTS ACTIVITY //
 
     console.log("activity:")
     console.log(activity)
+
+
 
     if (activity.includes("game")) {
 
@@ -89,18 +92,28 @@ module.exports = class JoinCommand extends Command {
 
 
     // USER INPUTS DESCRIPTION //
-    const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none':")
+    const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none'.")
     let description = await discordApi.getTextResponse(msg)
     description = description.replace("none", "")
+
     await descriptionEmbed.delete()
 
 
+    // USER INPUTS OPTIONS //
+    const optionsEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
+    let options = await discordApi.getTextResponse(msg)
+    options = options.replace("none", "")
+
+    await optionsEmbed.delete()
+
+
     // CREATE GAMING SESSION //
-    const loadingEmbed = await discordApi.embedText(msg, "Creating Gaming Session...", "")
+
+    const loadingEmbed = await discordApi.embedText(msg, `Creating Gaming Session...`, "")
     setTimeout(function () { loadingEmbed.delete() }, 2000);
 
     const createGameMessage = selectedActivity + ' "' + description + '"'
-    const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { game: selectedGame, message: createGameMessage, time: startTime } })
+    const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { game: selectedGame, message: createGameMessage, time: startTime, options: options } })
 
 
     // EMBED RETURNED GAMING SESSION //

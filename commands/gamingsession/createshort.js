@@ -28,19 +28,28 @@ module.exports = class JoinCommand extends Command {
             "Type the activity, ex. 'raid', 'last wish', 'gambit'",
           type: "string"
         },
-        {
-          key: "time",
-          prompt:
-            "Type the time, ex. 'this sunday at 3pm' or '5:30pm 4/25/20'",
-          type: "string",
-          validate: text => text.length > 1
-        }
-
       ]
     });
   }
-  async run(msg, { gaming_session_keywords, time }) {
-    const json = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { message: gaming_session_keywords, time: time } })
+  async run(msg, { gaming_session_keywords }) {
+
+
+    // USER INPUTS TIME //
+    const timeEmbed = await discordApi.embedText(msg, "Start Time", "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
+    const time = await discordApi.getTextResponse(msg)
+    await timeEmbed.delete()
+    if (!time) { return }
+    console.log("TIME: ")
+    console.log(time)
+
+    // USER INPUTS OPTIONS //
+    const optionsEmbed = await discordApi.embedText(msg, "Options", "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
+    let options = await discordApi.getTextResponse(msg)
+    options = options.replace("none", "")
+
+    await optionsEmbed.delete()
+
+    const json = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { message: gaming_session_keywords, time: time, options: options } })
 
     // EMBED RETURNED GAMING SESSION //
     const { notice, gaming_session } = json
