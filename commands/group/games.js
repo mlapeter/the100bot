@@ -31,6 +31,7 @@ module.exports = class GamesCommand extends Command {
           .setTitle(attachment.title)
           .setURL(attachment.title_link)
           .setDescription(attachment.text)
+          .setTimestamp(attachment.timestamp)
           .setColor(attachment.color);
         msg.embed(embed);
       });
