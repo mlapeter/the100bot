@@ -56,10 +56,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
       rejectUnauthorized: false // <<<<<<< YOU NEED THIS
     }
   },
-  // port: 5432,
-  // dialect: 'postgres',
-  // native: true
-}) // Example for postgres
+})
 
 sequelize.authenticate().then((response) => {
   console.log('Connection has been established successfully.');
@@ -72,7 +69,7 @@ sequelize.authenticate().then((response) => {
 
 
 
-// client.setProvider(new SequelizeProvider(sequelize));
+client.setProvider(new SequelizeProvider(sequelize));
 
 
 client.registry
