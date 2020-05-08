@@ -52,7 +52,7 @@ console.log(process.env.DATABASE_URL)
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   // port: 5432,
   // dialect: 'postgres',
-  native: true
+  // native: true
 }) // Example for postgres
 
 sequelize.authenticate().then((response) => {
