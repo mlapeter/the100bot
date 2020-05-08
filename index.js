@@ -47,9 +47,9 @@ const client = new CommandoClient({
 // });
 
 console.log("DB URL: ")
-console.log(process.env.DATABSE_URL)
+console.log(process.env.DATABASE_URL)
 
-const sequelize = new Sequelize(process.env.DATABSE_URL, {
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   // port: 5432,
   // dialect: 'postgres',
   native: true
