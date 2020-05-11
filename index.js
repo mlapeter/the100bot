@@ -17,7 +17,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialectOptions: {
     ssl: {
       require: true,
-      // rejectUnauthorized: false
+      rejectUnauthorized: false
     }
   },
 })
@@ -28,9 +28,7 @@ sequelize.authenticate().then((response) => {
   console.error('Unable to connect to the database:', e);
 })
 
-
 client.setProvider(new SequelizeProvider(sequelize));
-
 
 client.registry
   .registerDefaultTypes()
@@ -51,7 +49,5 @@ client.on('error', error => {
   console.log("Client Error");
   console.error('The WebSocket encountered an error:', error);
 });
-
-console.log("RUNNING")
 
 client.login(process.env.DISCORD_BOT_TOKEN);
