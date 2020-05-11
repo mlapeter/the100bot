@@ -4,6 +4,7 @@ const Sequelize = require('sequelize');
 const path = require("path");
 require('dotenv').config();
 
+
 const client = new CommandoClient({
   commandPrefix: "!",
   owner: process.env.OWNER_DISCORD_ID,
@@ -12,25 +13,20 @@ const client = new CommandoClient({
   unknownCommandResponse: false
 });
 
-console.log("DB URL: ")
-// console.log(process.env.DATABASE_URL)
-
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false // <<<<<<< YOU NEED THIS
+      // rejectUnauthorized: false
     }
   },
 })
 
 sequelize.authenticate().then((response) => {
-  console.log('Connection has been established successfully.');
-  console.log(response)
+  console.log('Database connected.');
 }).catch((e) => {
   console.error('Unable to connect to the database:', e);
 })
-
 
 
 client.setProvider(new SequelizeProvider(sequelize));
