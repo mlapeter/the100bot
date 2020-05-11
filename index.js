@@ -1,9 +1,8 @@
-const sqlite = require('sqlite');
-const { CommandoClient, SQLiteProvider } = require("discord.js-commando");
+const { CommandoClient } = require("discord.js-commando");
+const SequelizeProvider = require('./utils/sequelize')
+const Sequelize = require('sequelize');
 const path = require("path");
 require('dotenv').config();
-
-
 
 
 const client = new CommandoClient({
@@ -14,9 +13,22 @@ const client = new CommandoClient({
   unknownCommandResponse: false
 });
 
-sqlite.open(path.join(__dirname, "settings.sqlite3")).then((db) => {
-  client.setProvider(new SQLiteProvider(db));
-});
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  },
+})
+
+sequelize.authenticate().then((response) => {
+  console.log('Database connected.');
+}).catch((e) => {
+  console.error('Unable to connect to the database:', e);
+})
+
+client.setProvider(new SequelizeProvider(sequelize));
 
 client.registry
   .registerDefaultTypes()
