@@ -36,7 +36,7 @@ module.exports = class JoinCommand extends Command {
       msg.say(`*${msg.author}* joined:`)
       await discordApi.embedGamingSession(msg, gaming_session)
     } else {
-      msg.react("💩");
+      // msg.react("💩");
       return msg.author.send(json.notice);
     }
   }
