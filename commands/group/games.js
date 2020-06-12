@@ -20,8 +20,10 @@ module.exports = class GamesCommand extends Command {
 
   async run(msg) {
     const json = await api.postAction({ action: 'list_gaming_sessions', msg: msg, body: {} })
+    console.log(json)
 
     msg.say(json.text);
+
     if (!json.attachments || !json.attachments.length) {
       // No upcoming games
     } else {
@@ -30,7 +32,7 @@ module.exports = class GamesCommand extends Command {
         const embed = new RichEmbed()
           .setTitle(attachment.title)
           .setURL(attachment.title_link)
-          .setDescription(attachment.text)
+          .setDescription(attachment.description)
           .setTimestamp(attachment.timestamp)
           .setColor(attachment.color);
         msg.embed(embed);
