@@ -28,11 +28,20 @@ module.exports = class JoinCommand extends Command {
     });
   }
   async run(msg, { gaming_session_id }) {
-
-    const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id } })
+    let reserve = false
+    if (gaming_session_id.includes("reserve")) {
+      reserve = true
+    }
+    const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id, reserve: reserve } })
     const { notice, gaming_session } = json
 
-    if (notice.includes("You just joined")) {
+    if (notice.includes("reserve")) {
+      msg.say(`*${msg.author}* joined as reserve:`)
+      await discordApi.embedGamingSession(msg, gaming_session)
+    } else if (notice.includes("waitlist")) {
+      msg.say(`*${msg.author}* joined on waitlist:`)
+      await discordApi.embedGamingSession(msg, gaming_session)
+    } else if (notice.includes("You just joined")) {
       msg.say(`*${msg.author}* joined:`)
       await discordApi.embedGamingSession(msg, gaming_session)
     } else {

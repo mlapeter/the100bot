@@ -92,7 +92,7 @@ module.exports = class JoinCommand extends Command {
 
 
     // USER INPUTS DESCRIPTION //
-    const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter description or 'none'.")
+    const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, "Enter description or 'none':")
     let description = await discordApi.getTextResponse(msg)
     description = description.replace("none", "")
 
@@ -100,7 +100,7 @@ module.exports = class JoinCommand extends Command {
 
 
     // USER INPUTS OPTIONS //
-    const optionsEmbed = await discordApi.embedText(msg, selectedActivity, startTime + "\n Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
+    const optionsEmbed = await discordApi.embedText(msg, selectedActivity, "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
     let options = await discordApi.getTextResponse(msg)
     options = options.replace("none", "")
 

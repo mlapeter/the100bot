@@ -78,7 +78,7 @@ module.exports = class DiscordApi {
     const embed = new RichEmbed()
       .setTitle(gaming_session.title)
       .setURL(gaming_session.title_link)
-      .setDescription(gaming_session.text)
+      .setDescription(gaming_session.description)
       .setColor(gaming_session.color);
     return await msg.embed(embed);
   }
