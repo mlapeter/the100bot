@@ -2,6 +2,8 @@ const { Command } = require("discord.js-commando");
 const { RichEmbed } = require("discord.js");
 const Api = require('../../utils/api')
 const api = new Api
+const DiscordApi = require('../../utils/discordApi')
+const discordApi = new DiscordApi
 
 
 module.exports = class GamesCommand extends Command {
@@ -28,14 +30,7 @@ module.exports = class GamesCommand extends Command {
       // No upcoming games
     } else {
       json.attachments.forEach(function (attachment) {
-        console.log(attachment);
-        const embed = new RichEmbed()
-          .setTitle(attachment.title)
-          .setURL(attachment.title_link)
-          .setDescription(attachment.description)
-          .setTimestamp(attachment.timestamp)
-          .setColor(attachment.color);
-        msg.embed(embed);
+        discordApi.embedGamingSession(msg, attachment)
       });
     }
 

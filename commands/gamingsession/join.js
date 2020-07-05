@@ -31,6 +31,7 @@ module.exports = class JoinCommand extends Command {
 
     const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id } })
     const { notice, gaming_session } = json
+    console.log(gaming_session)
 
     if (notice.includes("You just joined")) {
       msg.say(`*${msg.author}* joined:`)
