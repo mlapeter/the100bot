@@ -33,7 +33,7 @@ module.exports = class CreateCommand extends Command {
       msg.react("💯");
     } else {
       msg.react("💩");
+      return msg.author.send(json.notice);
     }
-    return msg.author.send(json.notice);
   }
 };

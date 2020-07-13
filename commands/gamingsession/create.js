@@ -119,8 +119,9 @@ module.exports = class JoinCommand extends Command {
     // EMBED RETURNED GAMING SESSION //
     const { notice, gaming_session } = createGameJson
     if (notice.includes("Gaming Session Created!")) {
-      msg.say(`*${msg.author}* created:`)
-      await discordApi.embedGamingSession(msg, gaming_session)
+      // msg.say(`*${msg.author}* created:`)
+      // await discordApi.embedGamingSession(msg, gaming_session)
+      msg.react("💯");
     } else {
       msg.react("💩");
       return msg.author.send(notice);

@@ -19,7 +19,6 @@ module.exports = class LinkCommand extends Command {
   run(msg) {
     let content = `Click here to link your account!!: https://the100.io/linkdiscord/${encodeURIComponent(
       msg.author.id)}`;
-    console.log(content);
     msg.react("💯");
     return msg.author.send(content);
   }
