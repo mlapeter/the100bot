@@ -13,9 +13,6 @@ module.exports = class DiscordApi {
     } catch (e) {
       console.log("getTextResponse error:")
       console.log(e)
-      msg.say(
-        "Game Creation Canceled."
-      );
       return false
     }
   }
@@ -42,9 +39,6 @@ module.exports = class DiscordApi {
     } catch (e) {
       console.log("getEmojiResponse error:")
       console.log(e)
-      msg.say(
-        "Game Creation Canceled."
-      );
       return false
     }
   }
