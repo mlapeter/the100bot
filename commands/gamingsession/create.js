@@ -29,7 +29,8 @@ module.exports = class JoinCommand extends Command {
           key: "activity",
           prompt:
             "Type part of the Destiny 2 activity like `last wish raid` or `gambit`. To pick a different game, type `game` and part of the game name.",
-          type: "string"
+          type: "string",
+          default: "none"
         },
       ]
     });
@@ -41,10 +42,15 @@ module.exports = class JoinCommand extends Command {
     let publicGame = false
 
     // USER INPUTS ACTIVITY //
+    if (activity == "cancel") {
+      msg.delete()
+    } else if (activity == "none") {
+      const helpEmbed = await discordApi.embedText(msg, "", "Type part of the Destiny 2 activity like `last wish raid` or `gambit`. To pick a different game, type `game` and part of the game name.")
+      activity = await discordApi.getTextResponse(msg)
+      await helpEmbed.delete()
+    }
 
-    console.log("activity:")
-    console.log(activity)
-
+    if (!activity) { return }
 
 
     if (activity.includes("game")) {
@@ -94,7 +100,7 @@ module.exports = class JoinCommand extends Command {
     // USER INPUTS DESCRIPTION //
     const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, "Enter description or 'none':")
     let description = await discordApi.getTextResponse(msg)
-    description = description.replace("none", "")
+    description = description ? description.replace("none", "") : ""
 
     await descriptionEmbed.delete()
 
@@ -102,7 +108,7 @@ module.exports = class JoinCommand extends Command {
     // USER INPUTS OPTIONS //
     const optionsEmbed = await discordApi.embedText(msg, selectedActivity, "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
     let options = await discordApi.getTextResponse(msg)
-    options = options.replace("none", "")
+    options = options ? options.replace("none", "") : ""
 
     await optionsEmbed.delete()
 
@@ -119,8 +125,7 @@ module.exports = class JoinCommand extends Command {
     // EMBED RETURNED GAMING SESSION //
     const { notice, gaming_session } = createGameJson
     if (notice.includes("Gaming Session Created!")) {
-      msg.say(`*${msg.author}* created:`)
-      await discordApi.embedGamingSession(msg, gaming_session)
+      msg.react("💯");
     } else {
       msg.react("💩");
       return msg.author.send(notice);

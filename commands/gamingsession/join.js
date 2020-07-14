@@ -35,18 +35,13 @@ module.exports = class JoinCommand extends Command {
     const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id, reserve: reserve } })
     const { notice, gaming_session } = json
 
-    if (notice.includes("reserve")) {
-      msg.say(`*${msg.author}* joined as reserve:`)
-      await discordApi.embedGamingSession(msg, gaming_session)
-    } else if (notice.includes("waitlist")) {
-      msg.say(`*${msg.author}* joined on waitlist:`)
-      await discordApi.embedGamingSession(msg, gaming_session)
-    } else if (notice.includes("You just joined")) {
-      msg.say(`*${msg.author}* joined:`)
-      await discordApi.embedGamingSession(msg, gaming_session)
+    let substrings = ["reserve", "waitlist", "You just joined"]
+    if (substrings.some(v => notice.includes(v))) {
+      msg.react("💯");
     } else {
-      // msg.react("💩");
+      msg.react("💩");
       return msg.author.send(json.notice);
     }
+
   }
 };
