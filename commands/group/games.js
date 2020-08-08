@@ -32,7 +32,7 @@ module.exports = class GamesCommand extends Command {
   async run(msg, { options }) {
     console.log(msg)
     console.log(options)
-    const json = await api.postAction({ action: 'list_gaming_sessions', msg: msg })
+    const json = await api.postAction({ action: 'list_gaming_sessions', msg: msg, body: { options } })
     console.log(json)
 
     msg.say(json.text);
