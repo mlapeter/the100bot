@@ -16,12 +16,23 @@ module.exports = class GamesCommand extends Command {
       throttling: {
         usages: 2,
         duration: 60
-      }
+      },
+      args: [
+        {
+          key: "options",
+          prompt:
+            "Type 'all' for all games, and optionally a number to limit games returned.",
+          type: "string",
+          default: "group"
+        }
+      ]
     });
   }
 
-  async run(msg) {
-    const json = await api.postAction({ action: 'list_gaming_sessions', msg: msg, body: {} })
+  async run(msg, { options }) {
+    console.log(msg)
+    console.log(options)
+    const json = await api.postAction({ action: 'list_gaming_sessions', msg: msg })
     console.log(json)
 
     msg.say(json.text);
