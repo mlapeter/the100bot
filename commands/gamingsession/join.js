@@ -34,6 +34,7 @@ module.exports = class JoinCommand extends Command {
     }
     const json = await api.postAction({ action: 'join_gaming_session', msg: msg, body: { message: gaming_session_id, reserve: reserve } })
     const { notice, gaming_session } = json
+    console.log(notice)
 
     let substrings = ["reserve", "waitlist", "You just joined"]
     if (substrings.some(v => notice.includes(v))) {
