@@ -28,7 +28,7 @@ module.exports = class JoinCommand extends Command {
         {
           key: "activity",
           prompt:
-            "Type part of the Destiny 2 activity like `last wish raid` or `gambit`. To pick a different game, type `game` and part of the game name.",
+            "Type part of the  activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name.",
           type: "string",
           default: "none"
         },
@@ -38,14 +38,16 @@ module.exports = class JoinCommand extends Command {
 
   async run(msg, { activity }) {
     let json = null
-    let selectedGame = "Destiny 2"
     let publicGame = false
+
+    // FETCH USERS PRIMARY GAME //
+    let selectedGame = await api.postAction({ action: 'user_primary_game', msg: msg })
 
     // USER INPUTS ACTIVITY //
     if (activity == "cancel") {
       msg.delete()
     } else if (activity == "none") {
-      const helpEmbed = await discordApi.embedText(msg, "", "Type part of the Destiny 2 activity like `last wish raid` or `gambit`. To pick a different game, type `game` and part of the game name.")
+      const helpEmbed = await discordApi.embedText(msg, "", "Type part of the activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name.")
       activity = await discordApi.getTextResponse(msg)
       await helpEmbed.delete()
     }
