@@ -71,7 +71,7 @@ module.exports = class DiscordApi {
   async embedGamingSession(msg, gaming_session) {
     const embed = new RichEmbed()
       .setTitle(gaming_session.title)
-      .setURL(gaming_session.title_link)
+      .setURL(gaming_session.url)
       .setDescription(gaming_session.description)
       .setColor(gaming_session.color);
     return await msg.embed(embed);

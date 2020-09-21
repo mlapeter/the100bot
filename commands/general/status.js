@@ -1,4 +1,6 @@
 const { Command } = require("discord.js-commando");
+const Api = require('../../utils/api')
+const api = new Api
 
 module.exports = class MeowCommand extends Command {
   constructor(client) {
@@ -16,10 +18,16 @@ module.exports = class MeowCommand extends Command {
   }
   async run(msg) {
     const message = await msg.say(
-      `I'm awake! Active in: ${this.client.guilds.size} guilds.`
+      `Online!`
     );
+
+    const json = await api.postAction({ action: 'bot_status', msg: msg, body: {} })
+
     return message.edit(
-      `I'm awake! Active in: ${this.client.guilds.size} guilds.`
+      `Online! ${json.text ? json.text : ""}`
     );
+
+
+
   }
 };
