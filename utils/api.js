@@ -23,8 +23,7 @@ module.exports = class Api {
     console.log("postAction: ")
     console.log(action)
 
-    let url = `${
-      process.env.THE100_API_BASE_URL
+    let url = `${process.env.THE100_API_BASE_URL
       }discordbots/${action}`
 
     let data = {
@@ -37,9 +36,13 @@ module.exports = class Api {
 
     const res = await this.post(url, data)
 
-    if (res.status !== 201) {
+    if (res.status == 404) {
       return msg.say(
-        "Not Authorized - make sure the bot creator is using the correct API Token."
+        "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."
+      );
+    } else if (res.status !== 201) {
+      return msg.say(
+        "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help."
       );
     }
     return await res.json();
