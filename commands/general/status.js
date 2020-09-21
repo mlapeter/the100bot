@@ -2,7 +2,7 @@ const { Command } = require("discord.js-commando");
 const Api = require('../../utils/api')
 const api = new Api
 
-module.exports = class MeowCommand extends Command {
+module.exports = class StatusCommand extends Command {
   constructor(client) {
     super(client, {
       name: "the100status",

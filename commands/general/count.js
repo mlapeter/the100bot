@@ -1,6 +1,6 @@
 const { Command } = require("discord.js-commando");
 
-module.exports = class MeowCommand extends Command {
+module.exports = class CountCommand extends Command {
   constructor(client) {
     super(client, {
       name: "the100count",

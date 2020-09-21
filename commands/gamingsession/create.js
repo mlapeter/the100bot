@@ -147,7 +147,7 @@ module.exports = class JoinCommand extends Command {
     } catch (e) {
       console.log(e)
       msg.react("💩");
-      return msg.author.send("Type !link to link your The100 account first.");
+      return msg.author.send("Type !link to link your The100.io account first, or contact us at <https://www.the100.io/help>");
     }
   }
 };
