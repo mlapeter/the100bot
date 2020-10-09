@@ -103,7 +103,7 @@ module.exports = class JoinCommand extends Command {
 
 
       // USER INPUTS TIME //
-      const timeEmbed = await discordApi.embedText(msg, selectedActivity, "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
+      const timeEmbed = await discordApi.embedText(msg, selectedActivity, "What time? Type 'asap' to start as soon as it fills, or schedule a time: 'tonight at 7pm' or '11am 2/15/20'")
       const startTime = await discordApi.getTextResponse(msg)
       await timeEmbed.delete()
       if (!startTime) { return }
