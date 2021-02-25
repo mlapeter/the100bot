@@ -33,9 +33,8 @@ const client = new CommandoClient({
 //   client.setProvider(new SequelizeProvider(sequelize));
 // }
 
-console.log("CLIENT:")
+console.log("START:")
 
-console.log(client)
 
 
 client.registry
@@ -58,4 +57,9 @@ client.on('error', error => {
   console.error('The WebSocket encountered an error:', error);
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN).then().catch(error => {
+
+  console.log("Login failed! ");
+  console.log(error);
+
+}); //login in discord
