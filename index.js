@@ -33,7 +33,9 @@ const client = new CommandoClient({
 //   client.setProvider(new SequelizeProvider(sequelize));
 // }
 
+console.log("CLIENT:")
 
+console.log(client)
 
 
 client.registry
