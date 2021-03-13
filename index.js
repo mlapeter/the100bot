@@ -13,25 +13,25 @@ const client = new CommandoClient({
   unknownCommandResponse: false
 });
 
-// if (process.env.THE100_API_BASE_URL != "http://localhost:3000/api/v2/") {
-//   console.log("Connecting to database...")
-//   const sequelize = new Sequelize(process.env.DATABASE_URL, {
-//     dialectOptions: {
-//       ssl: {
-//         require: true,
-//         rejectUnauthorized: false
-//       }
-//     },
-//   })
+if (process.env.THE100_API_BASE_URL != "http://localhost:3000/api/v2/") {
+  console.log("Connecting to database...")
+  const sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+  })
 
-//   sequelize.authenticate().then((response) => {
-//     console.log('Database connected.');
-//   }).catch((e) => {
-//     console.error('Unable to connect to the database:', e);
-//   })
+  sequelize.authenticate().then((response) => {
+    console.log('Database connected.');
+  }).catch((e) => {
+    console.error('Unable to connect to the database:', e);
+  })
 
-//   client.setProvider(new SequelizeProvider(sequelize));
-// }
+  client.setProvider(new SequelizeProvider(sequelize));
+}
 
 console.log("START:")
 
