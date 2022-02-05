@@ -33,8 +33,6 @@ if (process.env.THE100_API_BASE_URL != "http://localhost:3000/api/v2/") {
   client.setProvider(new SequelizeProvider(sequelize));
 }
 
-console.log("START:")
-
 
 
 client.registry
@@ -58,8 +56,6 @@ client.on('error', error => {
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN).then().catch(error => {
-
   console.log("Login failed! ");
   console.log(error);
-
 }); //login in discord
