@@ -87,7 +87,7 @@ class SequelizeProvider extends SettingProvider {
       const guild = row.dataValues.guild !== '0' ? row.dataValues.guild : 'global';
 
       this.settings.set(guild, settings);
-      if (guild !== 'global' && !client.guilds.has(row.dataValues.guild)) continue;
+      if (guild !== 'global' && !client.guilds.cache.has(row.dataValues.guild)) continue;
       this.setupGuild(guild, settings);
     }
 
@@ -103,13 +103,13 @@ class SequelizeProvider extends SettingProvider {
       })
       .set('commandRegister', command => {
         for (const [guild, settings] of this.settings) {
-          if (guild !== 'global' && !client.guilds.has(guild)) continue;
+          if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
           this.setupGuildCommand(client.guilds.get(guild), command, settings);
         }
       })
       .set('groupRegister', group => {
         for (const [guild, settings] of this.settings) {
-          if (guild !== 'global' && !client.guilds.has(guild)) continue;
+          if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
           this.setupGuildGroup(client.guilds.get(guild), group, settings);
         }
       });
