@@ -17,7 +17,7 @@ module.exports = class CountCommand extends Command {
   }
   async run(msg) {
     await msg.say(
-      `Online in ${this.client.guilds.size} servers!`
+      `Online in ${this.client.guilds.cache.size} servers!`
     );
 
 

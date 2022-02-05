@@ -104,13 +104,13 @@ class SequelizeProvider extends SettingProvider {
       .set('commandRegister', command => {
         for (const [guild, settings] of this.settings) {
           if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
-          this.setupGuildCommand(client.guilds.get(guild), command, settings);
+          this.setupGuildCommand(client.guilds.cache.get(guild), command, settings);
         }
       })
       .set('groupRegister', group => {
         for (const [guild, settings] of this.settings) {
           if (guild !== 'global' && !client.guilds.cache.has(guild)) continue;
-          this.setupGuildGroup(client.guilds.get(guild), group, settings);
+          this.setupGuildGroup(client.guilds.cache.get(guild), group, settings);
         }
       });
     for (const [event, listener] of this.listeners) client.on(event, listener);
@@ -174,7 +174,7 @@ class SequelizeProvider extends SettingProvider {
 	 */
   setupGuild(guild, settings) {
     if (typeof guild !== 'string') throw new TypeError('The guild must be a guild ID or "global".');
-    guild = this.client.guilds.get(guild) || null;
+    guild = this.client.guilds.cache.get(guild) || null;
 
     // Load the command prefix
     if (typeof settings.prefix !== 'undefined') {
