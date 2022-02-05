@@ -55,24 +55,24 @@ module.exports = class DiscordApi {
 
   async embedTextAndEmojis(msg, title, description, emojis) {
     const embed = await this.embedText(msg, title, description)
-    await embed.react('1️⃣')
+    emojis.forEach(async emoji => {
+      try {
+        await embed.react('1️⃣')
+        embed.react(emoji)
+        console.log(emoji)
+      } catch (e) {
+        console.log("Emoji error: ")
+        console.log(e)
+      }
+    });
 
-    // emojis.forEach(async emoji => {
-    //   try {
-    //     await embed.react('1️⃣')
-    //     embed.react(emoji)
-    //     console.log(emoji)
-    //   } catch (e) {
-    //     console.log("Emoji error: ")
-    //     console.log(e)
-    //   }
-    // });
+    return embed
 
-    try {
-      return embed
-    } catch (e) {
-      console.log(e)
-    }
+    // try {
+    //   return embed
+    // } catch (e) {
+    //   console.log(e)
+    // }
   }
 
   async embedGamingSession(msg, gaming_session) {
