@@ -1,4 +1,5 @@
-const { RichEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
+// const { Discord } = require('discord.js');
 
 
 module.exports = class DiscordApi {
@@ -44,7 +45,7 @@ module.exports = class DiscordApi {
   }
 
   async embedText(msg, title, description) {
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setTitle(title)
       .setDescription(description)
       .setColor(0x00ae86);
@@ -54,22 +55,28 @@ module.exports = class DiscordApi {
 
   async embedTextAndEmojis(msg, title, description, emojis) {
     const embed = await this.embedText(msg, title, description)
-    emojis.forEach(async emoji => {
-      try {
-        await embed.react('1️⃣')
-        embed.react(emoji)
-        console.log(emoji)
-      } catch (e) {
-        console.log("Emoji error: ")
-        console.log(e)
-      }
-    });
+    await embed.react('1️⃣')
 
-    return embed
+    // emojis.forEach(async emoji => {
+    //   try {
+    //     await embed.react('1️⃣')
+    //     embed.react(emoji)
+    //     console.log(emoji)
+    //   } catch (e) {
+    //     console.log("Emoji error: ")
+    //     console.log(e)
+    //   }
+    // });
+
+    try {
+      return embed
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   async embedGamingSession(msg, gaming_session) {
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setTitle(gaming_session.title)
       .setURL(gaming_session.url)
       .setDescription(gaming_session.description)

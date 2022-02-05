@@ -1,5 +1,9 @@
 const { RichEmbed } = require("discord.js");
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
+// import fetch from 'node-fetch'
+
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
 
 
 module.exports = class Api {
@@ -35,7 +39,6 @@ module.exports = class Api {
     }
 
     const res = await this.post(url, data)
-
     if (res.status == 404) {
       return msg.say(
         "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."

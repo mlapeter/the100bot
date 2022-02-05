@@ -1,6 +1,7 @@
 const { Command } = require("discord.js-commando");
 const { RichEmbed } = require("discord.js");
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
+
 const _ = require('lodash');
 const Api = require('../../utils/api')
 const api = new Api
@@ -49,6 +50,8 @@ module.exports = class JoinCommand extends Command {
       console.log(selectedGame)
 
       if (selectedGame.notice) {
+        console.log("NOTICE:")
+        console.log(selectedGame.notice)
         msg.react("💩");
         return msg.author.send(selectedGame.notice);
       }
