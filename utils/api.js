@@ -2,8 +2,7 @@ const { RichEmbed } = require("discord.js");
 // const fetch = require("node-fetch");
 // import fetch from 'node-fetch'
 
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 module.exports = class Api {
   async post(url, data) {
@@ -24,11 +23,14 @@ module.exports = class Api {
   async postAction({ action, msg, body }) {
     console.log("postAction: ");
     console.log(action);
+    console.log("channel");
+    console.log(msg.channel.id);
 
     let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
     let data = {
       guild_id: msg.guild.id,
+      channel_id: msg.channel.id,
       discord_id: msg.author.id,
       username: msg.author.username,
       discriminator: msg.author.discriminator,
@@ -41,9 +43,7 @@ module.exports = class Api {
         "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."
       );
     } else if (res.status !== 201) {
-      return msg.say(
-        "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help."
-      );
+      return msg.say("Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.");
     }
     return await res.json();
   }
@@ -51,11 +51,13 @@ module.exports = class Api {
   async postReaction({ action, msg, user, body }) {
     console.log("postAction: ");
     console.log(action);
-
+    console.log("channel");
+    console.log(msg.channel.id);
     let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
     let data = {
       guild_id: msg.guild.id,
+      channel_id: msg.channel.id,
       discord_id: user.id,
       username: user.username,
       discriminator: user.discriminator,
@@ -72,9 +74,7 @@ module.exports = class Api {
         "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."
       );
     } else if (res.status !== 201) {
-      return msg.say(
-        "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help."
-      );
+      return msg.say("Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.");
     }
     return await res.json();
   }

@@ -11,28 +11,33 @@ module.exports = class JoinCommand extends Command {
       aliases: [],
       group: "gamingsession",
       memberName: "c",
-      description:
-        "quick create gaming session in one line: !create crucible control 'this is my awesome description'",
-      examples: [
-        "!create gambit ",
-        "!create crucible control 'this is my awesome description'",
-        "!create last wish raid",
-      ],
+      description: "Type a game and time, like: `!c Apex Legends in 5 hours`",
+      // defaultHandling: false,
+      examples: ["!c Apex Legends in 5 hours", "!c destiny 2 tomorrow at 3pm"],
       throttling: {
-        usages: 4,
+        usages: 6,
         duration: 120,
       },
       args: [
         {
           key: "gaming_session_keywords",
-          prompt: "Type the activity, ex. 'raid', 'last wish', 'gambit'",
+          prompt: "Type a game and time, like: `!c Apex Legends in 5 hours`",
           type: "string",
+          default: "none",
         },
       ],
     });
   }
   async run(msg, { gaming_session_keywords }) {
     console.log("STARTING CREATE SHORT");
+    if (gaming_session_keywords == "none") {
+      const helpEmbed = await discordApi.helpEmbed(msg, "", "");
+      return msg.embed(helpEmbed);
+    }
+    if (!gaming_session_keywords) {
+      return;
+    }
+    console.log("STILL IN CREATE SHORT");
     const regex = /( in | at | on )\s*(.+)/i;
     const match = regex.exec(gaming_session_keywords);
     let time = null;
@@ -41,30 +46,6 @@ module.exports = class JoinCommand extends Command {
       time = match[0];
       remainder = gaming_session_keywords.replace(time, "");
     }
-
-    // get the remainder of the string
-
-    console.log("TIME: ");
-    console.log(time);
-    console.log("REMAINDER: ");
-    console.log(remainder);
-
-    // fetch data at: https://www.the100.io/api/v2/games
-
-    // USER INPUTS TIME //
-    // const timeEmbed = await discordApi.embedText(msg, "Start Time", "What time? ex 'tonight at 7pm' or '11am 2/15/20'")
-    // const time = await discordApi.getTextResponse(msg)
-    // await timeEmbed.delete()
-    // if (!time) { return }
-    // console.log("TIME: ")
-    // console.log(time)
-
-    // // USER INPUTS OPTIONS //
-    // const optionsEmbed = await discordApi.embedText(msg, "Options", "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
-    // let options = await discordApi.getTextResponse(msg)
-    // options = options.replace("none", "")
-
-    // await optionsEmbed.delete()
 
     const json = await api.postAction({
       action: "create_gaming_session_simple",
@@ -78,7 +59,13 @@ module.exports = class JoinCommand extends Command {
       // msg.react("💯");
       discordApi.embedGamingSessionWithReactions(msg, gaming_session);
     } else {
-      msg.react("💩");
+      // msg.react("⚠️");
+      const message = await msg.say(`Check your DM's to link your account first...`);
+      // delete the message after 5 seconds
+      setTimeout(() => {
+        message.delete();
+      }, 5000);
+
       return msg.author.send(notice);
     }
   }

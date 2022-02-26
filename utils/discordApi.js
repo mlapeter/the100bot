@@ -64,30 +64,27 @@ module.exports = class DiscordApi {
   }
 
   async embedText(msg, title, description) {
-    const embed = new MessageEmbed()
-      .setTitle(title)
-      .setDescription(description)
-      .setColor(0x00ae86);
+    const embed = new MessageEmbed().setTitle(title).setDescription(description).setColor(0x00ae86);
     return await msg.embed(embed);
   }
 
-  async embedTextLarge(msg, title, description) {
-    const embed1 = new MessageEmbed()
+  async helpEmbed(msg, title, description) {
+    const embed = new MessageEmbed()
       .setTitle("Create Event")
-      .setDescription("")
+      // .setDescription("Create Event")
       .setColor(0x00ae86)
       .addFields(
         {
           name: "Create events in Discord",
-          value: "`!create Apex Legends in 5 hours`",
+          value: "`!c Apex Legends in 5 hours`",
         },
         {
           name: "Create events using Web Interface",
-          value:
-            "[Click to open create page](http://localhost:3000/groups/4/discordbot)",
+          value: "[Click to open create page](http://localhost:3000/gaming_sessions/new)",
         }
       );
-    return await msg.embed(embed1);
+    // return await msg.embed(embed1);
+    return embed;
   }
 
   // find all users
@@ -96,8 +93,8 @@ module.exports = class DiscordApi {
     const embed = await this.embedText(msg, title, description);
     emojis.forEach(async (emoji) => {
       try {
-        await embed.react("1️⃣");
-        embed.react(emoji);
+        // await embed.react("1️⃣");
+        await embed.react(emoji);
         console.log(emoji);
       } catch (e) {
         console.log("Emoji error: ");
@@ -147,17 +144,28 @@ module.exports = class DiscordApi {
     return;
   }
 
-  async embedGamingSessionDynamic(user, gaming_session, receivedEmbed = null) {
+  async convertEmbedToGamingSessionWithReactions(embed) {
+    const newEmbed = new MessageEmbed()
+      .setTitle(":calendar_spiral: " + embed.title)
+      .setURL(embed.url)
+      .setDescription(embed.description)
+      .setColor(embed.color)
+      .setFooter("✅ Join | 📝 Edit");
+    // const finishedEmbed = await msg.embed(newEmbed);
+    return newEmbed;
+  }
+
+  async embedGamingSessionDynamic(gaming_session, receivedEmbed = null) {
+    console.log("----------------------------------");
     console.log("gaming_session in embedGamingSessionDynamic: ");
     console.log(gaming_session);
     const embed = new MessageEmbed(receivedEmbed)
       .setTitle(":calendar_spiral: " + gaming_session.title)
       .setURL(gaming_session.url)
       .setDescription(gaming_session.description)
-      .setColor(gaming_session.color)
-      .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
-    console.log("embed in embedGamingSessionDynamic: ");
-    console.log(embed);
+      .setColor(gaming_session.color);
+    // .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
+    console.log("embed created in embedGamingSessionDynamic: ");
     return embed;
   }
 };

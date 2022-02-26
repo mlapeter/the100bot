@@ -1,11 +1,11 @@
 const { Command } = require("discord.js-commando");
 const { RichEmbed } = require("discord.js");
 
-const _ = require('lodash');
-const Api = require('../../utils/api')
-const api = new Api
-const DiscordApi = require('../../utils/discordApi')
-const discordApi = new DiscordApi
+const _ = require("lodash");
+const Api = require("../../utils/api");
+const api = new Api();
+const DiscordApi = require("../../utils/discordApi");
+const discordApi = new DiscordApi();
 
 module.exports = class JoinCommand extends Command {
   constructor(client) {
@@ -15,14 +15,10 @@ module.exports = class JoinCommand extends Command {
       group: "gamingsession",
       memberName: "schedule",
       description: "Creates a new gaming session",
-      examples: [
-        "!schedule last wish raid",
-        "!schedule gambit'",
-        "!schedule game the division"
-      ],
+      examples: ["!schedule last wish raid", "!schedule gambit'", "!schedule game the division"],
       throttling: {
         usages: 4,
-        duration: 120
+        duration: 120,
       },
       args: [
         {
@@ -30,17 +26,16 @@ module.exports = class JoinCommand extends Command {
           prompt:
             "Type part of the  activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name.",
           type: "string",
-          default: "none"
+          default: "none",
         },
-      ]
+      ],
     });
   }
 
   async run(msg, { activity }) {
-
     try {
-      let json = null
-      let publicGame = false
+      let json = null;
+      let publicGame = false;
 
       // FETCH USERS PRIMARY GAME //
       // console.log("getting user_primary_game")
@@ -57,15 +52,20 @@ module.exports = class JoinCommand extends Command {
 
       // USER INPUTS ACTIVITY //
       if (activity == "cancel") {
-        msg.delete()
+        msg.delete();
       } else if (activity == "none" || (activity.includes("game") && !activity.match(/\bgame\s+(.*)$/))) {
-        const helpEmbed = await discordApi.embedTextLarge(msg, "", "Type part of the activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name.")
-        activity = await discordApi.getTextResponse(msg)
-        await helpEmbed.delete()
+        const helpEmbed = await discordApi.helpEmbed(
+          msg,
+          "",
+          "Type part of the activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name."
+        );
+        activity = await discordApi.getTextResponse(msg);
+        await helpEmbed.delete();
       }
 
-      if (!activity) { return }
-
+      if (!activity) {
+        return;
+      }
 
       // if (activity.includes("game")) {
 
@@ -73,7 +73,6 @@ module.exports = class JoinCommand extends Command {
       //   console.log("SWITCHING GAME")
       //   activity = activity.replace("game", "")
       //   json = await api.postAction({ action: 'find_games', msg: msg, body: { game: activity } })
-
 
       //   // SELECT GAME //
       //   const gamesEmbed = await discordApi.embedTextAndEmojis(msg, "Select Game:", json.results.numbered_results, json.results.numbered_emojis)
@@ -92,10 +91,8 @@ module.exports = class JoinCommand extends Command {
       //   if (!activity) { return }
       // }
 
-
       // // SEARCH ACTIVITIES //
       // json = await api.postAction({ action: 'find_activities', msg: msg, body: { activity: activity, game: selectedGame } })
-
 
       // // SELECT ACTIVITY //
       // const activitiesEmbed = await discordApi.embedTextAndEmojis(msg, "Select Activity:", json.results.numbered_results, json.results.numbered_emojis)
@@ -103,53 +100,64 @@ module.exports = class JoinCommand extends Command {
       // await activitiesEmbed.delete();
       // if (!selectedActivity) { return }
 
-
       // USER INPUTS TIME //
-      const timeEmbed = await discordApi.embedText(msg, selectedActivity, "What time? Type 'asap' to start as soon as it fills, or schedule a time: 'tonight at 7pm' or '11am 2/15/20'")
-      const startTime = await discordApi.getTextResponse(msg)
-      await timeEmbed.delete()
-      if (!startTime) { return }
-
+      const timeEmbed = await discordApi.embedText(
+        msg,
+        selectedActivity,
+        "What time? Type 'asap' to start as soon as it fills, or schedule a time: 'tonight at 7pm' or '11am 2/15/20'"
+      );
+      const startTime = await discordApi.getTextResponse(msg);
+      await timeEmbed.delete();
+      if (!startTime) {
+        return;
+      }
 
       // USER INPUTS DESCRIPTION //
-      const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, "Enter description or 'none':")
-      let description = await discordApi.getTextResponse(msg)
-      description = description ? description.replace("none", "") : ""
+      const descriptionEmbed = await discordApi.embedText(msg, selectedActivity, "Enter description or 'none':");
+      let description = await discordApi.getTextResponse(msg);
+      description = description ? description.replace("none", "") : "";
 
-      await descriptionEmbed.delete()
-
+      await descriptionEmbed.delete();
 
       // USER INPUTS OPTIONS //
-      const optionsEmbed = await discordApi.embedText(msg, selectedActivity, "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia")
-      let options = await discordApi.getTextResponse(msg)
-      options = options ? options.replace("none", "") : ""
+      const optionsEmbed = await discordApi.embedText(
+        msg,
+        selectedActivity,
+        "Enter options or 'none'. Options: public, group only, sherpa requested, beginners welcome, xbox, ps4, pc, stadia"
+      );
+      let options = await discordApi.getTextResponse(msg);
+      options = options ? options.replace("none", "") : "";
 
-      await optionsEmbed.delete()
-
+      await optionsEmbed.delete();
 
       // CREATE GAMING SESSION //
 
-      const loadingEmbed = await discordApi.embedText(msg, `Creating Gaming Session...`, "")
-      setTimeout(function () { loadingEmbed.delete() }, 2000);
+      const loadingEmbed = await discordApi.embedText(msg, `Creating Gaming Session...`, "");
+      setTimeout(function () {
+        loadingEmbed.delete();
+      }, 2000);
 
-      const createGameMessage = selectedActivity + ' "' + description + '"'
-      const createGameJson = await api.postAction({ action: 'create_gaming_session', msg: msg, body: { game: selectedGame, message: createGameMessage, time: startTime, options: options } })
-
+      const createGameMessage = selectedActivity + ' "' + description + '"';
+      const createGameJson = await api.postAction({
+        action: "create_gaming_session",
+        msg: msg,
+        body: { game: selectedGame, message: createGameMessage, time: startTime, options: options },
+      });
 
       // EMBED RETURNED GAMING SESSION //
-      const { notice, gaming_session } = createGameJson
+      const { notice, gaming_session } = createGameJson;
       if (notice.includes("Gaming Session Created!")) {
         msg.react("💯");
       } else {
         msg.react("💩");
         return msg.author.send(notice);
       }
-
-
     } catch (e) {
-      console.log(e)
+      console.log(e);
       msg.react("💩");
-      return msg.author.send("Type !link to link your The100.io account first, or contact us at <https://www.the100.io/help>");
+      return msg.author.send(
+        "Type !link to link your The100.io account first, or contact us at <https://www.the100.io/help>"
+      );
     }
   }
 };
