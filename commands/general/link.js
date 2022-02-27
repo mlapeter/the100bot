@@ -17,9 +17,12 @@ module.exports = class LinkCommand extends Command {
   }
 
   run(msg) {
-    let content = `Click here to link your account: <https://the100.io/linkdiscord/${encodeURIComponent(
+    console.log("MESSAGE IN LINK:");
+    console.log(msg);
+    const guildId = msg.guild ? encodeURIComponent(msg.guild.id) : "";
+    const content = `Click here to link your account: <https://the100.io/linkdiscord/${encodeURIComponent(
       msg.author.id
-    )}/${encodeURIComponent(msg.author.username)}?guild_id=${encodeURIComponent(msg.guild.id)}>`;
+    )}/${encodeURIComponent(msg.author.username)}?guild_id=${guildId}>`;
     msg.react("💯");
     return msg.author.send(content);
   }

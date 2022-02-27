@@ -49,7 +49,7 @@ client.registry
     ["gamingsession", "Gaming Session Commands"],
   ])
   .registerDefaultGroups()
-  .registerDefaultCommands()
+  // .registerDefaultCommands()
   .registerCommandsIn(path.join(__dirname, "commands"));
 
 client.on("ready", () => {

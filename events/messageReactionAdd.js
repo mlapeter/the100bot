@@ -44,8 +44,9 @@ module.exports = (client) => {
       console.log("NOTICE:");
       console.log(notice);
 
-      if (!notice) {
+      if (!notice || notice == "Gaming Session not found.") {
         console.log("ERROR in messageReactionAdd");
+        return;
       }
 
       if (!gaming_session) {
@@ -66,7 +67,7 @@ module.exports = (client) => {
     if (reaction.emoji.name === "📝") {
       console.log("user editing game");
 
-      let content = `The event creator or group admin can edit it here: <http://localhost:3000/gaming_sessions/${reaction.message.id}/edit>`;
+      let content = `The event creator and group admin can edit or delete it here: <http://localhost:3000/gaming_sessions/${reaction.message.id}/edit>`;
 
       console.log("message.author.id");
       console.log(reaction.message.author.id);

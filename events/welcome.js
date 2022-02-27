@@ -16,8 +16,8 @@ module.exports = (client) => {
       .setTitle("Hello from The100bot!")
       .setDescription(
         "The100bot lets you to easily schedule gaming sessions.\n\n" +
-          "To get started, just type `!create test event at 8pm`, try it out!\n\n" +
-          "For advanced options, use the web interface by typing `!create`\n\n" +
+          "To get started, just type `!c test event at 8pm`, try it out!\n\n" +
+          "For advanced options, type `!create`\n\n" +
           "Or for help type `!help`\n\n" +
           "If you have any questions, feel free to join the support server: https://discord.gg/dBZRVB9"
       )

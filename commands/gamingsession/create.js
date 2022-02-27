@@ -34,6 +34,12 @@ module.exports = class JoinCommand extends Command {
 
   async run(msg, { activity }) {
     try {
+      if (msg.channel.type === "dm") {
+        return msg.author.send(
+          "Gaming sessions can only be created in public channels, but if you want to create a totally private gaming session you can use our website: <https://www.the100.io/gaming_sessions/new>."
+        );
+      }
+
       let json = null;
       let publicGame = false;
       let game = null;
@@ -53,27 +59,19 @@ module.exports = class JoinCommand extends Command {
 
       if (activity == "cancel") {
         msg.delete();
-      } else if (!selectedGame || !activity || activity == "none" || activity.includes("game")) {
+        return;
+      } else if (!activity || activity == "none") {
         console.log("No game selected");
         const helpEmbed = await discordApi.embedText(msg, "", "Type part of the game name like `apex` or `destiny 2`.");
         game = await discordApi.getTextResponse(msg);
         await helpEmbed.delete();
+      } else {
+        game = activity;
       }
 
-      // USER INPUTS ACTIVITY //
-      // if (activity == "cancel") {
-      //   msg.delete();
-      // } else if (activity == "none" || (activity.includes("game") && !activity.match(/\bgame\s+(.*)$/))) {
-      //   const helpEmbed = await discordApi.embedText(
-      //     msg,
-      //     "",
-      //     "Type part of the activity like `last wish raid` or `gambit`. To pick a different game than your primary game, type `game` and part of the game name."
-      //   );
-      //   activity = await discordApi.getTextResponse(msg);
-      //   await helpEmbed.delete();
-      // }
+      console.log("game: " + game);
 
-      if (!activity) {
+      if (game == "cancel") {
         return;
       }
 
@@ -192,7 +190,6 @@ module.exports = class JoinCommand extends Command {
       console.log("CREATE GAME JSON");
       console.log(createGameJson);
       if (notice.includes("Gaming Session Created!")) {
-        // msg.react("💯");
         discordApi.embedGamingSessionWithReactions(msg, gaming_session);
       } else {
         msg.react("💩");

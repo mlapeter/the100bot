@@ -7,9 +7,6 @@ const discordApi = new DiscordApi();
 // listen for webhooks received from the100.io and log to console
 module.exports = (client) => {
   client.on("message", async (message) => {
-    console.log("MESSAGE RECEIVED");
-    console.log(message.webhookID);
-
     if (message.webhookID) {
       console.log("WEBHOOK RECEIVED");
       console.log(message.content);
