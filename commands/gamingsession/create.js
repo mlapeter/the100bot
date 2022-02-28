@@ -79,7 +79,7 @@ module.exports = class JoinCommand extends Command {
         // USER INPUTS GAME STRING //
         console.log("SWITCHING GAME");
         activity = activity.replace("game", "");
-        json = await api.postAction({ action: "find_games", msg: msg, body: { game: activity } });
+        json = await api.postAction({ action: "find_games", msg: msg, body: { game: game } });
 
         // SELECT GAME //
         const gamesEmbed = await discordApi.embedTextAndEmojis(
