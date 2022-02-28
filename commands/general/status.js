@@ -1,6 +1,6 @@
 const { Command } = require("discord.js-commando");
-const Api = require('../../utils/api')
-const api = new Api
+const Api = require("../../utils/api");
+const api = new Api();
 
 module.exports = class StatusCommand extends Command {
   constructor(client) {
@@ -12,22 +12,18 @@ module.exports = class StatusCommand extends Command {
       description: "Check The100bot status.",
       throttling: {
         usages: 2,
-        duration: 10
-      }
+        duration: 10,
+      },
     });
   }
   async run(msg) {
-    const message = await msg.say(
-      `Online!`
-    );
+    console.log("STARTING STATUS");
+    const message = await msg.say(`Online!`);
+    console.log("MESSAGE: ");
+    console.log(message);
+    const json = await api.postAction({ action: "bot_status", msg: msg, body: {} });
+    console.log(json);
 
-    const json = await api.postAction({ action: 'bot_status', msg: msg, body: {} })
-
-    return message.edit(
-      `Online! ${json.text ? json.text : ""}`
-    );
-
-
-
+    return message.edit(`Online! ${json.text ? json.text : ""}`);
   }
 };

@@ -10,6 +10,13 @@ module.exports = (client) => {
     try {
       if (message.webhookID) {
         console.log("WEBHOOK RECEIVED");
+        console.log(message.author.username);
+
+        // return unless the message is from the100.io
+        if (message.author.username !== ("the100staging" || "The100.io")) {
+          return;
+        }
+
         console.log(message.content);
         // if message.content includes 'jump to' then we link to existing embed and update it
         if (message.content.includes("jump to")) {
@@ -55,10 +62,10 @@ module.exports = (client) => {
           msg.edit({ embed: newEmbed });
         } else {
           // Otherwise, we create a new embed
-          console.log("CREATING NEW EMBED...");
+
           // get the message's embed
           const receivedEmbed = message.embeds[0];
-          if (!receivedEmbed) {
+          if (!receivedEmbed || !receivedEmbed.url) {
             console.log("NO EMBED FOUND");
             return;
           }
@@ -71,10 +78,17 @@ module.exports = (client) => {
           // for the string receivedEmbed.url, parse out the id
           const idRegex = /\/([^\/]+)$/;
           const id = receivedEmbed.url.match(idRegex)[1];
+          if (!id) {
+            console.log("NO ID FOUND");
+            return;
+          }
           const gamingSessionId = id.split("?")[0];
+          if (!gamingSessionId) {
+            console.log("NO GAMING SESSION ID FOUND");
+            return;
+          }
 
-          console.log("ID:");
-          console.log(gamingSessionId);
+          console.log("CREATING NEW EMBED FOR GAMING SESSION: " + gamingSessionId);
 
           const newEmbed = await discordApi.convertEmbedToGamingSessionWithReactions(receivedEmbed);
 
