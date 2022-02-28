@@ -32,7 +32,9 @@ module.exports = class LinkCommand extends Command {
             "Quickly create simple events\n >>> `!c apex legends at 8pm` \n `!c destiny 2 next thursday at 8pm` \n `!c among us in 1 hour`",
         },
         { name: "!create", value: "Create advanced gaming sessions\n >>> `!create`" },
-        { name: "!link", value: "Link your account to The100.io" }
+        { name: "!link", value: "Link your account to The100.io\n >>> `!link`" },
+        { name: "!prefix", value: "Change the prefix for bot commands\n >>> `!prefix $`" }
+
         // { name: "!vote", value: "Vote for The100bot on top.gg, earn supporter points!" }
       );
     msg.channel.send(embed);

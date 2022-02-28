@@ -19,8 +19,6 @@ module.exports = class StatusCommand extends Command {
   async run(msg) {
     console.log("STARTING STATUS");
     const message = await msg.say(`Online!`);
-    console.log("MESSAGE: ");
-    console.log(message);
     const json = await api.postAction({ action: "bot_status", msg: msg, body: {} });
     console.log(json);
 
