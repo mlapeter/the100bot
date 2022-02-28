@@ -40,7 +40,7 @@ module.exports = class Api {
     const res = await this.post(url, data);
     if (res.status == 404 || res.status == 401) {
       return msg.say(
-        "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."
+        "Error: No The100.io group found. Go to <https://www.the100.io/groups/new> to re-add this bot from your group page."
       );
     } else if (res.status !== 201) {
       return msg.say("Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.");

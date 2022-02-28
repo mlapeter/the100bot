@@ -3,6 +3,7 @@ const Api = require("../../utils/api");
 const api = new Api();
 const DiscordApi = require("../../utils/discordApi");
 const discordApi = new DiscordApi();
+const chrono = require("chrono-node");
 
 module.exports = class JoinCommand extends Command {
   constructor(client) {
@@ -47,19 +48,19 @@ module.exports = class JoinCommand extends Command {
         return;
       }
       console.log("STILL IN CREATE SHORT");
-      const regex = /( in | at | on )\s*(.+)/i;
-      const match = regex.exec(gaming_session_keywords);
-      let time = null;
-      let remainder = null;
-      if (match) {
-        time = match[0];
-        remainder = gaming_session_keywords.replace(time, "");
-      }
+
+      const results = chrono.parse(gaming_session_keywords);
+      console.log("CHRONO PARSED");
+      const time_text = results[0].text;
+      console.log(time_text);
+      const remainder = gaming_session_keywords.replace(time_text, "");
+      console.log("PARSED REMAINDER:");
+      console.log(remainder);
 
       const json = await api.postAction({
         action: "create_gaming_session_simple",
         msg: msg,
-        body: { message: remainder, time: time },
+        body: { message: remainder ? remainder : gaming_session_keywords, time: time_text },
       });
 
       // EMBED RETURNED GAMING SESSION //

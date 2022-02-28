@@ -21,6 +21,7 @@
   "author": "mlapeter",
   "license": "ISC",
   "dependencies": {
+    "chrono-node": "2.3.7",
     "discord.js": "12.5.3",
     "discord.js-commando": "0.12.3",
     "dotenv": "^7.0.0",
