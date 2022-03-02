@@ -70,10 +70,10 @@ module.exports = class JoinCommand extends Command {
         discordApi.embedGamingSessionWithReactions(msg, gaming_session);
       } else {
         // msg.react("⚠️");
-        const message = await msg.say(`Check your DM's to link your account first...`);
+        // const message = await msg.say(`Check your DM's to link your account first...`);
         // delete the message after 5 seconds
         setTimeout(() => {
-          message.delete();
+          msg.delete();
         }, 5000);
 
         return msg.author.send(notice);
