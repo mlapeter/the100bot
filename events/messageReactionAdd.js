@@ -67,8 +67,8 @@ module.exports = (client) => {
 
       if (reaction.emoji.name === "📝") {
         console.log("user editing game");
-
-        let content = `The event creator and group admin can edit or delete it here: <http://localhost:3000/gaming_sessions/${reaction.message.id}/edit>`;
+        let url = `<${process.env.THE100_API_BASE_URL}gaming_sessions/${reaction.message.id}/edit>`;
+        let content = `The event creator and group admin can edit or delete it here: ${url}`;
 
         console.log("message.author.id");
         console.log(reaction.message.author.id);

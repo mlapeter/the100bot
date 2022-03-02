@@ -69,6 +69,8 @@ module.exports = class DiscordApi {
   }
 
   async helpEmbed(msg, title, description) {
+    let url = `${process.env.THE100_API_BASE_URL}gaming_sessions/new`;
+
     const embed = new MessageEmbed()
       .setTitle("Create Event")
       // .setDescription("Create Event")
@@ -80,7 +82,7 @@ module.exports = class DiscordApi {
         },
         {
           name: "Create events using Web Interface",
-          value: "[Click to open create page](http://localhost:3000/gaming_sessions/new)",
+          value: `[Click to open create page](${url})`,
         }
       );
     // return await msg.embed(embed1);
