@@ -13,7 +13,8 @@ module.exports = (client) => {
         console.log(message.author.username);
 
         // return unless the message is from the100.io
-        if (message.author.username !== ("the100staging" || "The100.io")) {
+        if (message.author.username !== ("the100staging" || "The100.io" || "the100bot")) {
+          console.log("NOT FROM THE100.IO");
           return;
         }
 
