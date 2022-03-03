@@ -75,7 +75,6 @@ module.exports = (client) => {
           const messageContent = message.content;
           console.log("RECEIVED EMBED:");
           console.log(receivedEmbed);
-          await message.delete();
 
           // for the string receivedEmbed.url, parse out the id
           const idRegex = /\/([^\/]+)$/;
@@ -88,6 +87,32 @@ module.exports = (client) => {
           if (!gamingSessionId) {
             console.log("NO GAMING SESSION ID FOUND");
             return;
+          }
+
+          // check if we have permission to edit embeds
+          console.log("CHECKING PERMISSIONS...");
+          if (!message.guild.me.hasPermission("MANAGE_MESSAGES")) {
+            console.log("NO PERMISSION TO EDIT MESSAGES");
+            const url = `${process.env.THE100_API_BASE_URL}`;
+
+            // find the owner of the guild
+            // const owner = await message.member.guild.owner;
+
+            // console.log("GUILD OWNER:");
+            // console.log(owner);
+
+            const embed = new MessageEmbed()
+              .setTitle("We've updated The100bot!")
+              .setDescription(
+                `You can now use reactions to join/leave games! But first you've got to re-add the bot from your group page with new permissions so we can edit embeds: ${url}`
+              )
+              .setColor("#ff0000");
+            // await owner.send(embed);
+
+            const newMessage = await message.channel.send(messageContent, { embed: embed });
+          } else {
+            console.log("HAS PERMISSION TO EDIT MESSAGES");
+            await message.delete();
           }
 
           console.log("CREATING NEW EMBED FOR GAMING SESSION: " + gamingSessionId);
