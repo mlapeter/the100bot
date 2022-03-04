@@ -21,7 +21,10 @@
   "author": "mlapeter",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/builders": "0.12.0",
+    "@discordjs/rest": "0.3.0",
     "chrono-node": "2.3.7",
+    "discord-api-types": "0.27.3",
     "discord.js": "12.5.3",
     "discord.js-commando": "0.12.3",
     "dotenv": "^7.0.0",
