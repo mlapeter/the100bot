@@ -4,72 +4,138 @@ const Api = require("./api");
 const api = new Api();
 
 module.exports = class DiscordApi {
-  async getTextResponse(msg) {
-    try {
-      const filter = (m) => m.author.id === msg.author.id;
-      const responses = await msg.channel.awaitMessages(filter, {
-        max: 1,
-        time: 45000,
-        errors: ["time"],
+  async getTextResponse(interaction) {
+    console.log("START getTextResponse");
+    console.log("interaction.user.id: ");
+    console.log(interaction.user.id);
+    console.log(interaction.user);
+
+    const msg_filter = (m) => m.author.id === interaction.user.id;
+    const collected = await interaction.channel.awaitMessages({ filter: msg_filter, max: 1 });
+    console.log("collected: ");
+    console.log(collected.first().content);
+    return collected.first().content;
+  }
+
+  getItemFromReaction(reaction, items) {
+    const reactionHash = {
+      "1️⃣": 0,
+      "2️⃣": 1,
+      "3️⃣": 2,
+      "4️⃣": 3,
+      "5️⃣": 4,
+      "6️⃣": 5,
+      "7️⃣": 6,
+      "8️⃣": 7,
+      "9️⃣": 8,
+    };
+
+    let activityIndex = reactionHash[reaction.emoji.name];
+    // console.log(activityIndex);
+    // console.log(items);
+    // console.log(items[activityIndex]);
+    const selected = items[activityIndex];
+    console.log("getItemFromReaction RESPONSE: ");
+    console.log(selected);
+    return selected;
+  }
+
+  async getEmojiResponse(interaction, embed, reactions, items) {
+    console.log("START getEmojiResponse");
+    let selected = null;
+
+    const filter = (reaction) => reactions.includes(reaction.emoji.name);
+    const collector = embed.createReactionCollector({ filter });
+
+    // create a promise that resolves when the user selects a game
+    const selectedGamePromise = new Promise((resolve, reject) => {
+      collector.on("collect", (reaction, user) => {
+        if (user.id == interaction.user.id) {
+          selected = this.getItemFromReaction(reaction, items);
+          resolve(reaction.emoji.name);
+        }
       });
-      const response = responses.first().content;
-      if (response && response == "cancel") {
-        return false;
+    });
+    await selectedGamePromise;
+    console.log("getEmojiResponse RESULT");
+    console.log(selected);
+    return selected;
+  }
+
+  // async getEmojiResponse(interaction, embed, reactions) {
+  //   console.log("START getEmojiResponse");
+
+  //   // try {
+  //   // console.log("getEmojiResponse!");
+  //   const emojiHash = {
+  //     "1️⃣": 0,
+  //     "2️⃣": 1,
+  //     "3️⃣": 2,
+  //     "4️⃣": 3,
+  //     "5️⃣": 4,
+  //     "6️⃣": 5,
+  //     "7️⃣": 6,
+  //     "8️⃣": 7,
+  //     "9️⃣": 8,
+  //   };
+
+  //   const filter = (reaction) => reactions.includes(reaction.emoji.name);
+  //   const collector = embed.createReactionCollector({ filter });
+
+  //   // console.log("COLLECTOR:");
+  //   // console.log(collector);
+
+  //   // create a promise that resolves when the user selects a reaction
+  //   let selectedReaction = null;
+  //   const selectedReactionPromise = new Promise((resolve, reject) => {
+  //     collector.on("collect", (reaction, user) => {
+  //       console.log(`Just collected a ${reaction.emoji.name} reaction from ${user.username}`);
+
+  //       if (user.id == interaction.user.id) {
+  //         selectedReaction = reaction;
+  //         resolve(reaction.emoji.name);
+  //       }
+  //     });
+  //   });
+
+  //   await selectedReactionPromise;
+
+  //   const selectedIndex = emojiHash[selectedReaction.emoji.name];
+  //   console.log("getEmojiResponse: ");
+  //   console.log(selectedIndex);
+  //   console.log(reactions);
+  //   console.log(reactions[selectedIndex]);
+  //   const selected = reactions[selectedIndex];
+  //   return selected;
+  //   // } catch (e) {
+  //   //   console.log("getEmojiResponse error:");
+  //   //   console.log(e);
+  //   //   return false;
+  //   // }
+  // }
+
+  async embedText(interaction, title, description) {
+    console.log("EMBED TEXT DESCRIPTION");
+    console.log(description);
+    // check if description is an array and convert to string
+    if (description instanceof Array) {
+      console.log("ARRAY DETECTED");
+      let numbered_results_string = "";
+      for (let i = 0; i < description.length; i++) {
+        numbered_results_string += description[i] + "\n";
       }
-      return response;
-    } catch (e) {
-      console.log("getTextResponse error:");
-      console.log(e);
-      return false;
+      description = numbered_results_string;
     }
-  }
+    console.log(description);
+    // convert description to string
+    // description = description.toString();
 
-  async getEmojiResponse(msg, embed, results) {
-    try {
-      console.log("getEmojiResponse");
-      const emojiHash = {
-        "1️⃣": 0,
-        "2️⃣": 1,
-        "3️⃣": 2,
-        "4️⃣": 3,
-        "5️⃣": 4,
-        "6️⃣": 5,
-        "7️⃣": 6,
-        "8️⃣": 7,
-        "9️⃣": 8,
-      };
-
-      let filter = (reaction, user) => user.id === msg.author.id;
-      let userReactions = await embed.awaitReactions(filter, {
-        max: 1,
-        time: 45000,
-        errors: ["time"],
-      });
-      console.log("userReactions: ");
-      console.log(userReactions);
-
-      let reaction = userReactions.first();
-      let activityIndex = emojiHash[reaction.emoji.name];
-      console.log("getEmojiResponse: ");
-      console.log(activityIndex);
-      console.log(results);
-      console.log(results[activityIndex]);
-      const selected = results[activityIndex];
-      return selected;
-    } catch (e) {
-      console.log("getEmojiResponse error:");
-      console.log(e);
-      return false;
-    }
-  }
-
-  async embedText(msg, title, description) {
-    const embed = new MessageEmbed().setTitle(title).setDescription(description).setColor(0x00ae86);
-    return await msg.embed(embed);
+    const embed = new MessageEmbed().setTitle(title).setDescription(description.toString()).setColor(0x00ae86);
+    return await interaction.channel.send({ embeds: [embed] });
   }
 
   async helpEmbed(msg, title, description) {
-    let url = `${process.env.THE100_API_BASE_URL}gaming_sessions/new`;
+    let url = `${process.env.THE100_BASE_URL}gaming_sessions/new`;
 
     const embed = new MessageEmbed()
       .setTitle("Create Event")
@@ -91,13 +157,12 @@ module.exports = class DiscordApi {
 
   // find all users
 
-  async embedTextAndEmojis(msg, title, description, emojis) {
-    const embed = await this.embedText(msg, title, description);
+  async embedTextAndEmojis(interaction, title, description, emojis) {
+    const embed = await this.embedText(interaction, title, description);
     emojis.forEach(async (emoji) => {
       try {
         // await embed.react("1️⃣");
         await embed.react(emoji);
-        console.log(emoji);
       } catch (e) {
         console.log("Emoji error: ");
         console.log(e);
@@ -113,13 +178,15 @@ module.exports = class DiscordApi {
     // }
   }
 
-  async embedGamingSession(msg, gaming_session) {
+  async embedGamingSession(interaction, gaming_session) {
     const embed = new MessageEmbed()
       .setTitle(gaming_session.title)
       .setURL(gaming_session.url)
       .setDescription(gaming_session.description)
       .setColor(gaming_session.color);
-    return await msg.embed(embed);
+    console.log("EMBED:");
+    console.log(embed);
+    return await interaction.channel.send({ embeds: [embed] });
   }
 
   async embedGamingSessionWithReactions(msg, gaming_session) {

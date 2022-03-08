@@ -8,6 +8,8 @@ const discordApi = new DiscordApi();
 module.exports = (client) => {
   client.on("message", async (message) => {
     try {
+      console.log("message received");
+      console.log(message);
       if (message.webhookID) {
         console.log("WEBHOOK RECEIVED");
         console.log(message.author.username);
