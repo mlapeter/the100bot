@@ -8,13 +8,14 @@ const chrono = require("chrono-node");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("c")
-    .setDescription("Quickly create a simple event")
+    .setDescription("Quickly create a simple event!")
     .addStringOption((option) => option.setName("input").setDescription("The input to echo back")),
   async execute(interaction) {
     const value = interaction.options.getString("input");
     // if (!value) {
     //   return interaction.reply("Type the event name and time, like 'apex legends in 2 hours'");
     // }
+    console.log("STARTING CREATE");
 
     if (!value || value == "none") {
       await interaction.reply("Help:");
@@ -56,8 +57,8 @@ module.exports = {
     // EMBED RETURNED GAMING SESSION //
     const { notice, gaming_session } = json;
     if (notice.includes("Gaming Session Created!")) {
+      discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
       interaction.reply("Gaming session created!");
-      discordApi.embedGamingSession(interaction, gaming_session);
     } else {
       setTimeout(() => {
         interaction.reply.delete();

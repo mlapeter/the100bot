@@ -63,177 +63,134 @@ module.exports = {
     } else {
       game = value;
     }
-
     console.log("Game: " + game);
-
-    if (game == "cancel") {
+    if (!game || game == "cancel") {
       return;
     }
 
-    if (game) {
-      console.log("SWITCHING GAME");
-      // activity = activity.replace("game", "");
-      json = await api.postAction({ action: "find_games", interaction: interaction, body: { game: game } });
+    // USER SELECTS GAME //
+    json = await api.postAction({ action: "find_games", interaction: interaction, body: { game: game } });
+    const gamesEmbed = await discordApi.embedTextAndEmojis(
+      interaction,
+      "Select Game:",
+      json.results.numbered_results,
+      json.results.numbered_emojis
+    );
 
-      // SELECT GAME //
-      const gamesEmbed = await discordApi.embedTextAndEmojis(
-        interaction,
-        "Select Game:",
-        json.results.numbered_results,
-        json.results.numbered_emojis
-      );
-      // selectedGame = await discordApi.getEmojiResponse(interaction, gamesEmbed, json.results.string_results);
+    selectedGame = await discordApi.getEmojiResponse(
+      interaction,
+      gamesEmbed,
+      json.results.numbered_emojis,
+      json.results.string_results
+    );
 
-      // const gamesEmbed = new MessageEmbed()
-      //   .setTitle("Select Game:")
-      //   .setDescription(numbered_results_string)
-      //   .setColor(0x00ae86);
+    console.log("SELECTED GAME:");
+    console.log(selectedGame);
+    await gamesEmbed.delete();
+    if (!selectedGame) {
+      return;
+    }
 
-      // let reactions = json.results.numbered_emojis;
-      // let msgEmbed = await interaction.channel.send({ embeds: [gamesEmbed] });
-      // reactions.forEach(async (reaction) => await msgEmbed.react(reaction));
+    // USER TYPES ACTIVITY STRING //
+    const sampleActivities = await api.postAction({
+      action: "find_activities",
+      interaction: interaction,
+      body: { activity: "", game: selectedGame },
+    });
 
-      // const filter = (reaction) => reactions.includes(reaction.emoji.name);
-      // const collector = msgEmbed.createReactionCollector({ filter });
+    const example1 = _.sample(sampleActivities.results.all_activities);
+    const example2 = _.sample(sampleActivities.results.all_activities);
 
-      // // create a promise that resolves when the user selects a game
-      // const selectedGamePromise = new Promise((resolve, reject) => {
-      //   collector.on("collect", (reaction, user) => {
-      //     if (user.id == interaction.user.id) {
-      //       selectedGame = discordApi.getItemFromReaction(reaction, json.results.string_results);
-      //       resolve(reaction.emoji.name);
-      //     }
-      //   });
-      // });
+    const activitiesListEmbed = await discordApi.embedText(
+      interaction,
+      selectedGame,
+      `What activity? ex '${example1}' or '${example2}'.`
+    );
+    activity = await discordApi.getTextResponse(interaction);
+    await activitiesListEmbed.delete();
+    if (!activity) {
+      return;
+    }
 
-      // // wait for the promise to resolve
-      // await selectedGamePromise;
+    // SEARCH ACTIVITIES //
+    json = await api.postAction({
+      action: "find_activities",
+      interaction: interaction,
+      body: { activity: activity, game: selectedGame },
+    });
 
-      selectedGame = await discordApi.getEmojiResponse(
-        interaction,
-        gamesEmbed,
-        json.results.numbered_emojis,
-        json.results.string_results
-      );
+    // USER SELECTS ACTIVITY //
+    const activitiesEmbed = await discordApi.embedTextAndEmojis(
+      interaction,
+      "Select Activity:",
+      json.results.numbered_results,
+      json.results.numbered_emojis
+    );
+    const selectedActivity = await discordApi.getEmojiResponse(
+      interaction,
+      activitiesEmbed,
+      json.results.numbered_emojis,
+      json.results.string_results
+    );
 
-      console.log("SELECTED GAME:");
-      console.log(selectedGame);
-      await gamesEmbed.delete();
-      if (!selectedGame) {
-        return;
-      }
+    console.log("SELECTED ACTIVITY:");
+    console.log(selectedActivity);
 
-      // USER TYPES ACTIVITY STRING //
-      const sampleActivities = await api.postAction({
-        action: "find_activities",
-        interaction: interaction,
-        body: { activity: "", game: selectedGame },
-      });
+    await activitiesEmbed.delete();
+    if (!selectedActivity) {
+      return;
+    }
 
-      const example1 = _.sample(sampleActivities.results.all_activities);
-      const example2 = _.sample(sampleActivities.results.all_activities);
+    // // USER INPUTS TIME //
+    const timeEmbed = await discordApi.embedText(
+      interaction,
+      selectedActivity,
+      "What time? Type 'asap' to start as soon as it fills, or schedule a time: 'tonight at 7pm' or '11am 2/15/20'"
+    );
+    const startTime = await discordApi.getTextResponse(interaction);
+    await timeEmbed.delete();
+    if (!startTime) {
+      return;
+    }
 
-      const activitiesListEmbed = await discordApi.embedText(
-        interaction,
-        selectedGame,
-        `What activity? ex '${example1}' or '${example2}'.`
-      );
-      activity = await discordApi.getTextResponse(interaction);
-      await activitiesListEmbed.delete();
-      if (!activity) {
-        return;
-      }
+    // USER INPUTS DESCRIPTION //
+    const descriptionEmbed = await discordApi.embedText(interaction, selectedActivity, "Enter description or 'none':");
+    let description = await discordApi.getTextResponse(interaction);
+    description = description ? description.replace("none", "") : "";
+    await descriptionEmbed.delete();
 
-      if (!activity) {
-        return;
-      }
+    // USER INPUTS OPTIONS //
+    const optionsEmbed = await discordApi.embedText(
+      interaction,
+      selectedActivity,
+      "Enter options or 'none'. Options: public, sherpa requested, beginners welcome, xbox, ps4, pc, stadia"
+    );
+    let options = await discordApi.getTextResponse(interaction);
+    options = options ? options.replace("none", "") : "";
+    await optionsEmbed.delete();
 
-      // SEARCH ACTIVITIES //
-      json = await api.postAction({
-        action: "find_activities",
-        interaction: interaction,
-        body: { activity: activity, game: selectedGame },
-      });
+    // CREATE GAMING SESSION //
+    const loadingEmbed = await discordApi.embedText(interaction, `Creating Gaming Session...`, "");
+    setTimeout(function () {
+      loadingEmbed.delete();
+    }, 2000);
 
-      // USER SELECTS ACTIVITY //
-      const activitiesEmbed = await discordApi.embedTextAndEmojis(
-        interaction,
-        "Select Activity:",
-        json.results.numbered_results,
-        json.results.numbered_emojis
-      );
-      const selectedActivity = await discordApi.getEmojiResponse(
-        interaction,
-        activitiesEmbed,
-        json.results.numbered_emojis,
-        json.results.string_results
-      );
+    const createGameMessage = selectedActivity + ' "' + description + '"';
+    const createGameJson = await api.postAction({
+      action: "create_gaming_session",
+      interaction: interaction,
+      body: { game: selectedGame, message: createGameMessage, time: startTime, options: options },
+    });
 
-      console.log("SELECTED ACTIVITY:");
-      console.log(selectedActivity);
-
-      await activitiesEmbed.delete();
-      if (!selectedActivity) {
-        return;
-      }
-
-      // // USER INPUTS TIME //
-      const timeEmbed = await discordApi.embedText(
-        interaction,
-        selectedActivity,
-        "What time? Type 'asap' to start as soon as it fills, or schedule a time: 'tonight at 7pm' or '11am 2/15/20'"
-      );
-      const startTime = await discordApi.getTextResponse(interaction);
-      await timeEmbed.delete();
-      if (!startTime) {
-        return;
-      }
-
-      // USER INPUTS DESCRIPTION //
-      const descriptionEmbed = await discordApi.embedText(
-        interaction,
-        selectedActivity,
-        "Enter description or 'none':"
-      );
-      let description = await discordApi.getTextResponse(interaction);
-      description = description ? description.replace("none", "") : "";
-
-      await descriptionEmbed.delete();
-
-      // USER INPUTS OPTIONS //
-      const optionsEmbed = await discordApi.embedText(
-        interaction,
-        selectedActivity,
-        "Enter options or 'none'. Options: public, sherpa requested, beginners welcome, xbox, ps4, pc, stadia"
-      );
-      let options = await discordApi.getTextResponse(interaction);
-      options = options ? options.replace("none", "") : "";
-
-      await optionsEmbed.delete();
-
-      // CREATE GAMING SESSION //
-      const loadingEmbed = await discordApi.embedText(interaction, `Creating Gaming Session...`, "");
-      setTimeout(function () {
-        loadingEmbed.delete();
-      }, 2000);
-
-      const createGameMessage = selectedActivity + ' "' + description + '"';
-      const createGameJson = await api.postAction({
-        action: "create_gaming_session",
-        interaction: interaction,
-        body: { game: selectedGame, message: createGameMessage, time: startTime, options: options },
-      });
-
-      // EMBED RETURNED GAMING SESSION //
-      const { notice, gaming_session } = createGameJson;
-      console.log("CREATE GAME JSON");
-      console.log(createGameJson);
-      if (notice.includes("Gaming Session Created!")) {
-        discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
-      } else {
-        interaction.react("💩");
-        return interaction.author.send(notice);
-      }
+    // EMBED RETURNED GAMING SESSION //
+    const { notice, gaming_session } = createGameJson;
+    console.log("CREATE GAME JSON");
+    console.log(createGameJson);
+    if (notice.includes("Gaming Session Created!")) {
+      discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
+    } else {
+      interaction.react("💩");
+      return interaction.author.send(notice);
     }
   },
 };

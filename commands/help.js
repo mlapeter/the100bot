@@ -4,6 +4,8 @@ const { MessageEmbed } = require("discord.js");
 module.exports = {
   data: new SlashCommandBuilder().setName("help").setDescription("Get help using The100Bot"),
   async execute(interaction) {
+    console.log("STARTING HELP");
+
     await interaction.reply("Help:");
 
     const embed = new MessageEmbed()

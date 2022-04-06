@@ -23,17 +23,17 @@ module.exports = class Api {
   async postAction({ action, interaction, body }) {
     console.log("postAction: ");
     console.log(action);
-    console.log("channel");
-    console.log(interaction.channelId);
+    console.log("------------------------------------");
+    // console.log(interaction);
 
     let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
     let data = {
       guild_id: interaction.guildId,
       channel_id: interaction.channelId,
-      discord_id: interaction.user.id,
-      username: interaction.user.username,
-      discriminator: interaction.user.discriminator,
+      discord_id: interaction.user ? interaction.user.id : interaction.author.id,
+      username: interaction.user ? interaction.user.username : interaction.author.username,
+      discriminator: interaction.user ? interaction.user.discriminator : interaction.author.discriminator,
       ...body,
     };
 

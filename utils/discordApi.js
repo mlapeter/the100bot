@@ -1,15 +1,10 @@
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
 // const { Discord } = require('discord.js');
 const Api = require("./api");
 const api = new Api();
 
 module.exports = class DiscordApi {
   async getTextResponse(interaction) {
-    console.log("START getTextResponse");
-    console.log("interaction.user.id: ");
-    console.log(interaction.user.id);
-    console.log(interaction.user);
-
     const msg_filter = (m) => m.author.id === interaction.user.id;
     const collected = await interaction.channel.awaitMessages({ filter: msg_filter, max: 1 });
     console.log("collected: ");
@@ -31,9 +26,6 @@ module.exports = class DiscordApi {
     };
 
     let activityIndex = reactionHash[reaction.emoji.name];
-    // console.log(activityIndex);
-    // console.log(items);
-    // console.log(items[activityIndex]);
     const selected = items[activityIndex];
     console.log("getItemFromReaction RESPONSE: ");
     console.log(selected);
@@ -62,58 +54,6 @@ module.exports = class DiscordApi {
     return selected;
   }
 
-  // async getEmojiResponse(interaction, embed, reactions) {
-  //   console.log("START getEmojiResponse");
-
-  //   // try {
-  //   // console.log("getEmojiResponse!");
-  //   const emojiHash = {
-  //     "1️⃣": 0,
-  //     "2️⃣": 1,
-  //     "3️⃣": 2,
-  //     "4️⃣": 3,
-  //     "5️⃣": 4,
-  //     "6️⃣": 5,
-  //     "7️⃣": 6,
-  //     "8️⃣": 7,
-  //     "9️⃣": 8,
-  //   };
-
-  //   const filter = (reaction) => reactions.includes(reaction.emoji.name);
-  //   const collector = embed.createReactionCollector({ filter });
-
-  //   // console.log("COLLECTOR:");
-  //   // console.log(collector);
-
-  //   // create a promise that resolves when the user selects a reaction
-  //   let selectedReaction = null;
-  //   const selectedReactionPromise = new Promise((resolve, reject) => {
-  //     collector.on("collect", (reaction, user) => {
-  //       console.log(`Just collected a ${reaction.emoji.name} reaction from ${user.username}`);
-
-  //       if (user.id == interaction.user.id) {
-  //         selectedReaction = reaction;
-  //         resolve(reaction.emoji.name);
-  //       }
-  //     });
-  //   });
-
-  //   await selectedReactionPromise;
-
-  //   const selectedIndex = emojiHash[selectedReaction.emoji.name];
-  //   console.log("getEmojiResponse: ");
-  //   console.log(selectedIndex);
-  //   console.log(reactions);
-  //   console.log(reactions[selectedIndex]);
-  //   const selected = reactions[selectedIndex];
-  //   return selected;
-  //   // } catch (e) {
-  //   //   console.log("getEmojiResponse error:");
-  //   //   console.log(e);
-  //   //   return false;
-  //   // }
-  // }
-
   async embedText(interaction, title, description) {
     console.log("EMBED TEXT DESCRIPTION");
     console.log(description);
@@ -127,8 +67,6 @@ module.exports = class DiscordApi {
       description = numbered_results_string;
     }
     console.log(description);
-    // convert description to string
-    // description = description.toString();
 
     const embed = new MessageEmbed().setTitle(title).setDescription(description.toString()).setColor(0x00ae86);
     return await interaction.channel.send({ embeds: [embed] });
@@ -154,8 +92,6 @@ module.exports = class DiscordApi {
     // return await msg.embed(embed1);
     return embed;
   }
-
-  // find all users
 
   async embedTextAndEmojis(interaction, title, description, emojis) {
     const embed = await this.embedText(interaction, title, description);
@@ -189,21 +125,37 @@ module.exports = class DiscordApi {
     return await interaction.channel.send({ embeds: [embed] });
   }
 
-  async embedGamingSessionWithReactions(msg, gaming_session) {
+  async embedGamingSessionWithReactions(interaction, gaming_session) {
+    console.log("In embedGamingSessionWithReactions");
+    console.log(interaction);
+
+    const row = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId("join-" + gaming_session.id.toString())
+        .setLabel("Join")
+        .setStyle("PRIMARY"),
+      new MessageButton()
+        .setCustomId("leave-" + gaming_session.id.toString())
+        .setLabel("Leave")
+        .setStyle("SECONDARY")
+    );
+
     const embed = new MessageEmbed()
       .setTitle(":calendar_spiral: " + gaming_session.title)
       .setURL(gaming_session.url)
       .setDescription(gaming_session.description)
-      .setColor(gaming_session.color)
-      .setFooter("✅ Join | 📝 Edit | Created by " + msg.author.username);
-    const finishedEmbed = await msg.embed(embed);
+      .setColor(gaming_session.color);
+    // .setFooter("✅ Join | 📝 Edit | Created by " + msg.author.username);
+    const finishedEmbed = await interaction.channel.send({ embeds: [embed], components: [row] });
 
-    await finishedEmbed.react("✅");
-    await finishedEmbed.react("📝");
+    // const finishedEmbed = await interaction.reply({ embeds: [embed], components: [row] });
+
+    // await finishedEmbed.react("✅");
+    // await finishedEmbed.react("📝");
 
     await api.postAction({
       action: "update_gaming_session",
-      msg: msg,
+      interaction: interaction,
       body: {
         gaming_session_id: gaming_session.id,
         embed_id: finishedEmbed.id,
@@ -213,19 +165,41 @@ module.exports = class DiscordApi {
     return;
   }
 
-  async convertEmbedToGamingSessionWithReactions(embed) {
+  async convertEmbedToGamingSessionWithReactions(message, messageContent, embed, gamingSessionId) {
+    console.log("In convertEmbedToGamingSessionWithReactions");
+
+    const row = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId("join-" + gamingSessionId.toString())
+        .setLabel("Join")
+        .setStyle("PRIMARY"),
+      new MessageButton()
+        .setCustomId("leave-" + gamingSessionId.toString())
+        .setLabel("Leave")
+        .setStyle("SECONDARY")
+    );
+
     const newEmbed = new MessageEmbed()
       .setTitle(":calendar_spiral: " + embed.title)
       .setURL(embed.url)
       .setDescription(embed.description)
-      .setColor(embed.color)
-      .setFooter("✅ Join | 📝 Edit");
+      .setColor(embed.color);
+    // .setFooter("✅ Join | 📝 Edit");
     // const finishedEmbed = await msg.embed(newEmbed);
-    return newEmbed;
+    // return newEmbed;
+
+    const finishedEmbed = await message.channel.send({
+      content: messageContent ? messageContent : "TESTING",
+      embeds: [newEmbed],
+      components: [row],
+    });
+    return finishedEmbed;
   }
 
   async embedGamingSessionDynamic(gaming_session, receivedEmbed = null) {
     console.log("----------------------------------");
+    console.log("In embedGamingSessionDynamic");
+    console.log(receivedEmbed);
     console.log("gaming_session in embedGamingSessionDynamic: ");
     console.log(gaming_session);
     const embed = new MessageEmbed(receivedEmbed)
@@ -235,6 +209,7 @@ module.exports = class DiscordApi {
       .setColor(gaming_session.color);
     // .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
     console.log("embed created in embedGamingSessionDynamic: ");
+    console.log(embed);
     return embed;
   }
 };

@@ -9,8 +9,13 @@ const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 const path = require("path");
 require("dotenv").config();
 
-// const welcome = require("./events/welcome");
-const messageReactionAdd = require("./events/messageReactionAdd");
+const Api = require("./utils/api");
+const api = new Api();
+const DiscordApi = require("./utils/discordApi");
+const discordApi = new DiscordApi();
+
+const welcome = require("./events/welcome");
+// const messageReactionAdd = require("./events/messageReactionAdd");
 // const messageReactionRemove = require("./events/messageReactionRemove");
 const handleWebhooks = require("./events/handleWebhooks");
 
@@ -91,7 +96,7 @@ client.once("ready", () => {
   // welcome(client);
   // messageReactionAdd(client);
   // messageReactionRemove(client);
-  // handleWebhooks(client);
+  handleWebhooks(client);
 });
 
 client.on("error", (error) => {
@@ -104,8 +109,91 @@ client.on("messageCreate", async (message) => {
   console.log(`Message from ${message.author.tag}: ${message.content}`);
 });
 
+// client.on("interactionCreate", async (interaction) => {
+// if (!interaction.isButton()) return;
+// console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
+
+// console.log("user joining game");
+// const json = await api.postReaction({
+//   action: "join_gaming_session",
+//   msg: interaction.message,
+//   user: interaction.user,
+//   body: { gaming_session_id: interaction.customId },
+// });
+// console.log(json);
+// const { notice, gaming_session } = json;
+
+// const substrings = ["reserve", "waitlist", "You just joined"];
+// if (substrings.some((v) => notice.includes(v))) {
+//   // await interaction.deferUpdate();
+//   console.log("CHECKING PERMISSIONS...");
+//   // check if we have edit message permissions
+//   if (!interaction.message.channel.permissionsFor(interaction.user).has("MANAGE_MESSAGES")) {
+//     console.log("NO PERMISSIONS");
+//     // return interaction.reply("You don't have permissions to edit messages.");
+//   }
+
+//   const receivedEmbed = interaction.message.embeds[0];
+//   const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
+//   console.log("ORIGINAL interaction.message: ");
+//   console.log(interaction.message);
+//   await interaction.update({ embeds: [exampleEmbed] });
+//   console.log("UPDATED interaction.message: ");
+//   console.log(interaction.user);
+//   return;
+// } else {
+//   // await interaction.deferUpdate();
+//   console.log("ERROR:");
+//   console.log(notice);
+//   console.log(interaction);
+//   // await interaction.reply(notice);
+//   await interaction.reply({ content: notice, ephemeral: true });
+
+// await interaction.update({ content: "A button was clicked!", components: [] });
+// }
+
+// console.log("NOTICE:");
+// console.log(notice);
+
+// if (!notice || notice == "Gaming Session not found.") {
+//   console.log("ERROR in messageReactionAdd");
+//   return;
+// }
+
+// if (!gaming_session) {
+//   // return interaction.user.send(json.notice);
+//   await interaction.reply(notice);
+// }
+
+// console.log("GAMING SESSION:");
+// console.log(gaming_session);
+
+// console.log("CHECKING PERMISSIONS...");
+// // check if we have edit message permissions
+// if (!interaction.message.channel.permissionsFor(interaction.user).has("MANAGE_MESSAGES")) {
+//   console.log("NO PERMISSIONS");
+//   return interaction.reply("You don't have permissions to edit messages.");
+// }
+
+// const receivedEmbed = interaction.message.embeds[0];
+// const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
+// console.log("ORIGINAL interaction.message: ");
+// console.log(interaction.message);
+// await interaction.update({ embeds: [exampleEmbed] });
+// console.log("UPDATED interaction.message: ");
+// console.log(interaction.user);
+// return;
+
+// await interaction.reply(`${interaction.user} joined ${gaming_session.title}!`);
+// });
+
+// collector.on("end", (collected) => {
+//   console.log(`Collected ${collected.size} interactions.`);
+// });
+// });
+
 client.on("interactionCreate", async (interaction) => {
-  console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
+  // console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
 
   if (!interaction.isCommand()) return;
 
