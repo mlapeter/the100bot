@@ -69,7 +69,9 @@ module.exports = class DiscordApi {
     console.log(description);
 
     const embed = new MessageEmbed().setTitle(title).setDescription(description.toString()).setColor(0x00ae86);
-    return await interaction.channel.send({ embeds: [embed] });
+    // return await interaction.channel.send({ embeds: [embed] });
+    return await interaction.followUp({ embeds: [embed] });
+    // return embed;
   }
 
   async helpEmbed(msg, title, description) {
@@ -95,6 +97,9 @@ module.exports = class DiscordApi {
 
   async embedTextAndEmojis(interaction, title, description, emojis) {
     const embed = await this.embedText(interaction, title, description);
+
+    // const finishedEmbed = await interaction.followUp({ embeds: [embed] });
+
     emojis.forEach(async (emoji) => {
       try {
         // await embed.react("1️⃣");

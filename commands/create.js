@@ -8,28 +8,28 @@ const { MessageEmbed } = require("discord.js");
 const _ = require("lodash");
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("create")
-    .setDescription("Create a new gaming session.")
-    // .addStringOption((option) =>
-    //   option
-    //     .setName("game-name")
-    //     .setDescription("The game name")
-    //     .setRequired(true)
-    //     .addChoice("Apex-Legends", "gif_funny")
-    //     .addChoice("Destiny-2", "gif_meme")
-    //     .addChoice("Among", "gif_movie")
-    // ),
-    .addStringOption((option) => option.setName("game").setDescription("The name of the game")),
+  data: new SlashCommandBuilder().setName("create").setDescription("Create a new gaming session."),
+  // .addStringOption((option) =>
+  //   option
+  //     .setName("game-name")
+  //     .setDescription("The game name")
+  //     .setRequired(true)
+  //     .addChoice("Apex-Legends", "gif_funny")
+  //     .addChoice("Destiny-2", "gif_meme")
+  //     .addChoice("Among", "gif_movie")
+  // ),
+  // .addStringOption((option) => option.setName("game").setDescription("The name of the game")),
 
   async execute(interaction) {
-    const value = interaction.options.getString("game");
+    // const value = interaction.options.getString("game");
 
     // try {
     // return if user is in a DM channel
 
-    console.log("VALUE:");
-    console.log(value);
+    // console.log("VALUE:");
+    // console.log(value);
+
+    await interaction.deferReply();
 
     let json = null;
     let game = null;
@@ -49,24 +49,43 @@ module.exports = {
     }
 
     // USER INPUTS GAME STRING //
-    if (value == "cancel") {
-      interaction.delete();
-      return;
-    } else if (!value || value == "none") {
-      const helpEmbed = await discordApi.embedText(
-        interaction,
-        "",
-        "Type part of the game name like `apex` or `destiny 2`."
-      );
-      game = await discordApi.getTextResponse(interaction);
-      await helpEmbed.delete();
-    } else {
-      game = value;
-    }
-    console.log("Game: " + game);
+    const helpEmbed = await discordApi.embedText(
+      interaction,
+      "",
+      "Type part of the game name like `apex` or `destiny 2`."
+    );
+
+    // const finishedHelpEmbed = await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
+
+    game = await discordApi.getTextResponse(interaction);
+
+    console.log("GAME IS:");
+    console.log(game);
+
+    await helpEmbed.delete();
+
     if (!game || game == "cancel") {
       return;
     }
+
+    // if (value == "cancel") {
+    //   interaction.delete();
+    //   return;
+    // } else if (!value || value == "none") {
+    //   const helpEmbed = await discordApi.embedText(
+    //     interaction,
+    //     "",
+    //     "Type part of the game name like `apex` or `destiny 2`."
+    //   );
+    //   game = await discordApi.getTextResponse(interaction);
+    //   await helpEmbed.delete();
+    // } else {
+    //   game = value;
+    // }
+    // console.log("Game: " + game);
+    // if (!game || game == "cancel") {
+    //   return;
+    // }
 
     // USER SELECTS GAME //
     json = await api.postAction({ action: "find_games", interaction: interaction, body: { game: game } });
@@ -106,6 +125,9 @@ module.exports = {
       selectedGame,
       `What activity? ex '${example1}' or '${example2}'.`
     );
+
+    // const finishedActivitiesListEmbed = await interaction.followUp({ embeds: [activitiesListEmbed] });
+
     activity = await discordApi.getTextResponse(interaction);
     await activitiesListEmbed.delete();
     if (!activity) {

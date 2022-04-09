@@ -95,6 +95,10 @@ module.exports = (client) => {
       if (!receivedEmbed || !receivedEmbed.url) {
         console.log("NO EMBED FOUND");
         return;
+      } else {
+        console.log("EMBED FOUND");
+        console.log(receivedEmbed.url);
+        console.log(receivedEmbed);
       }
 
       const messageContent = message.content;
