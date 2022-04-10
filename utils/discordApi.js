@@ -69,22 +69,24 @@ module.exports = class DiscordApi {
     console.log(description);
 
     const embed = new MessageEmbed().setTitle(title).setDescription(description.toString()).setColor(0x00ae86);
-    // return await interaction.channel.send({ embeds: [embed] });
     return await interaction.followUp({ embeds: [embed] });
-    // return embed;
   }
 
   async helpEmbed(msg, title, description) {
-    let url = `${process.env.THE100_BASE_URL}gaming_sessions/new`;
+    const url = `${process.env.THE100_BASE_URL}gaming_sessions/new`;
 
     const embed = new MessageEmbed()
-      .setTitle("Create Event")
+      .setTitle("Create Events")
       // .setDescription("Create Event")
       .setColor(0x00ae86)
       .addFields(
         {
-          name: "Create events in Discord",
-          value: "`!c Apex Legends in 5 hours`",
+          name: "Create simple events in Discord",
+          value: "`/c Apex Legends in 5 hours`",
+        },
+        {
+          name: "Create gaming sessions in Discord",
+          value: "`/create`",
         },
         {
           name: "Create events using Web Interface",
@@ -143,6 +145,11 @@ module.exports = class DiscordApi {
         .setCustomId("leave-" + gaming_session.id.toString())
         .setLabel("Leave")
         .setStyle("SECONDARY")
+      // new MessageButton()
+      //   .setCustomId("refresh-" + gaming_session.id.toString())
+      //   .setLabel("")
+      //   .setEmoji("🔄")
+      //   .setStyle("SECONDARY")
     );
 
     const embed = new MessageEmbed()
@@ -154,6 +161,10 @@ module.exports = class DiscordApi {
     const finishedEmbed = await interaction.channel.send({ embeds: [embed], components: [row] });
 
     // const finishedEmbed = await interaction.reply({ embeds: [embed], components: [row] });
+
+    // emoji for plus
+    // const plus = await finishedEmbed.react("➕");
+    // const minus = await finishedEmbed.react("➖");
 
     // await finishedEmbed.react("✅");
     // await finishedEmbed.react("📝");
@@ -182,6 +193,10 @@ module.exports = class DiscordApi {
         .setCustomId("leave-" + gamingSessionId.toString())
         .setLabel("Leave")
         .setStyle("SECONDARY")
+      // new MessageButton()
+      //   .setCustomId("refresh-" + gamingSessionId.toString())
+      //   .setLabel("Refresh")
+      //   .setStyle("SECONDARY")
     );
 
     const newEmbed = new MessageEmbed()
@@ -202,11 +217,6 @@ module.exports = class DiscordApi {
   }
 
   async embedGamingSessionDynamic(gaming_session, receivedEmbed = null) {
-    console.log("----------------------------------");
-    console.log("In embedGamingSessionDynamic");
-    console.log(receivedEmbed);
-    console.log("gaming_session in embedGamingSessionDynamic: ");
-    console.log(gaming_session);
     const embed = new MessageEmbed(receivedEmbed)
       .setTitle(":calendar_spiral: " + gaming_session.title)
       .setURL(gaming_session.url)

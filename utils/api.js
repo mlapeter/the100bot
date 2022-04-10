@@ -55,9 +55,9 @@ module.exports = class Api {
     console.log(action);
     console.log("channel");
     console.log(msg.channel.id);
-    let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
+    const url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
-    let data = {
+    const data = {
       guild_id: msg.guild.id,
       channel_id: msg.channel.id,
       discord_id: user.id,
@@ -72,11 +72,16 @@ module.exports = class Api {
 
     const res = await this.post(url, data);
     if (res.status == 404) {
-      return msg.say(
-        "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page."
-      );
+      return msg.channel.send({
+        content:
+          "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page.",
+        ephemeral: true,
+      });
     } else if (res.status !== 201) {
-      return msg.say("Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.");
+      return msg.channel.send({
+        content: "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.",
+        ephemeral: true,
+      });
     }
     return await res.json();
   }

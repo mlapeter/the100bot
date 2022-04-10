@@ -25,19 +25,11 @@ module.exports = {
     const substrings = ["reserve", "waitlist", "You just joined"];
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Game Joined!", ephemeral: true });
-
-      // await interaction.message.react("💯");
     } else {
-      // await interaction.deferUpdate();
       console.log("ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });
-
-      // interaction.react("💩");
-      // await interaction.reply(notice);
-
-      // return interaction.author.send(json.notice);
     }
   },
 };

@@ -19,13 +19,12 @@ module.exports = {
       )
       .addFields(
         {
-          name: "!c",
+          name: "/c",
           value:
             "Quickly create simple events\n >>> `!c apex legends at 8pm` \n `!c destiny 2 next thursday at 8pm` \n `!c among us in 1 hour`",
         },
-        { name: "!create", value: "Create advanced gaming sessions\n >>> `!create`" },
-        { name: "!link", value: "Link your account to The100.io\n >>> `!link`" },
-        { name: "!prefix", value: "Change the prefix for bot commands\n >>> `!prefix $`" }
+        { name: "/create", value: "Create advanced gaming sessions\n >>> `!create`" },
+        { name: "/link", value: "Link your account to The100.io\n >>> `!link`" }
         // { name: "!vote", value: "Vote for The100bot on top.gg, earn supporter points!" }
       );
     return await interaction.channel.send({ embeds: [embed] });

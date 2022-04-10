@@ -10,7 +10,6 @@ module.exports = {
     console.log(
       `${interaction.user.tag} in #${interaction.channel.name} triggered an interaction in interactionCreate.js.`
     );
-    console.log(interaction);
 
     let action = null;
 
@@ -23,6 +22,9 @@ module.exports = {
     } else if (interaction.customId.includes("leave-")) {
       action = "leave_gaming_session";
       console.log("user leaving game");
+    } else if (interaction.customId.includes("refresh-")) {
+      action = "refresh_gaming_session";
+      console.log("refreshing game");
     }
 
     const json = await api.postReaction({
@@ -31,31 +33,33 @@ module.exports = {
       user: interaction.user,
       body: { gaming_session_id: gaming_session_id },
     });
-    console.log(json);
+
     const { notice, gaming_session } = json;
 
+    // return if no gaming_session
+    if (!gaming_session) {
+      return;
+    }
+
     const substrings = ["reserve", "waitlist", "You just joined", "Game left"];
-    if (substrings.some((v) => notice.includes(v))) {
+    if (gaming_session || (notice && substrings.some((v) => notice.includes(v)))) {
       console.log("CHECKING PERMISSIONS...");
       // check if we have edit message permissions
       if (!interaction.message.channel.permissionsFor(interaction.user).has("MANAGE_MESSAGES")) {
         console.log("NO PERMISSIONS");
-        // return interaction.reply("You don't have permissions to edit messages.");
+        return interaction.reply(
+          "The bot doesn't have permissions to edit messages, please reinstall with full permissions."
+        );
       }
 
       const receivedEmbed = interaction.message.embeds[0];
       const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
       await interaction.update({ embeds: [exampleEmbed] });
-      // console.log("UPDATED interaction.message: ");
-      // console.log(interaction.user);
       return;
     } else {
-      // await interaction.deferUpdate();
       console.log("ERROR:");
       console.log(notice);
-      // console.log(interaction);
-      // await interaction.reply(notice);
-      await interaction.reply({ content: notice, ephemeral: true });
+      await interaction.reply({ content: notice ? notice : "An error ocurred, please contact us.", ephemeral: true });
     }
   },
 };

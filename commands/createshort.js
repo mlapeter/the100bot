@@ -12,10 +12,6 @@ module.exports = {
     .addStringOption((option) => option.setName("input").setDescription("The input to echo back")),
   async execute(interaction) {
     const value = interaction.options.getString("input");
-    // if (!value) {
-    //   return interaction.reply("Type the event name and time, like 'apex legends in 2 hours'");
-    // }
-    console.log("STARTING CREATE");
 
     if (!value || value == "none") {
       await interaction.reply("Help:");
@@ -31,13 +27,15 @@ module.exports = {
       );
     }
 
-    console.log("VALUE:");
-    console.log(value);
     const results = chrono.parse(value);
-    if (!results) {
-      await interaction.reply("Help:");
+    // return if results is an empty array or null
+    if (!results || results.length == 0) {
       const helpEmbed = await discordApi.helpEmbed(interaction, "", "");
-      return interaction.embed(helpEmbed);
+
+      return await interaction.reply({
+        content: "I couldn't understand your input. Try writing it like 'apex legends tomorrow at 3pm'",
+        embeds: [helpEmbed],
+      });
     }
 
     console.log("CHRONO PARSED RESULTS:");
