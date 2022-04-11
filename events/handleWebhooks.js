@@ -30,12 +30,32 @@ module.exports = (client) => {
       const url = message.content.match(urlRegex)[0];
       // parse out the string after the very last slash in the url
       const idRegex = /\/([^\/]+)$/;
-      const id = url.match(idRegex)[1];
-      const idStripped = id.replace(")", "");
+      const messageId = url.match(idRegex)[1];
+      const idStripped = messageId.replace(")", "");
       console.log(idStripped);
 
+      // const channelId = url.match(idRegex)[0];
+      // console.log(channelId);
+      // strip out any slashes from channelId
+      // const channelIdStripped = channelId.replace(/\//g, "").replace(")", "");
+      // console.log("channelIdStripped: ");
+      // console.log(channelIdStripped);
+
+      // parse out the string between the second to last slash and last slash in the url
+      const embedIdRegex = /\/([^\/]+)\/([^\/]+)$/;
+      const channelId = url.match(embedIdRegex)[1];
+      console.log("channelIdStripped: ");
+      console.log(channelId);
+
+      // find the message in the guild with the id or return if not found
+      const guild = client.guilds.cache.find((guild) => guild.id === message.guildId);
+      const channel = guild.channels.cache.find((channel) => channel.id === channelId);
+      const existingEmbedMessage = await channel.messages.fetch(idStripped);
+      console.log("EXISTING EMBED MESSAGE:");
+      console.log(existingEmbedMessage);
+
       // find the message in the channel with the id or return if not found
-      const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
+      // const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
       if (!existingEmbedMessage) {
         return;
       }

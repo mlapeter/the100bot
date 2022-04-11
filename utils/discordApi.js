@@ -175,7 +175,7 @@ module.exports = class DiscordApi {
       body: {
         gaming_session_id: gaming_session.id,
         embed_id: finishedEmbed.id,
-        channel_id: message.channel.id,
+        channel_id: interaction.channel.id,
       },
     });
 
