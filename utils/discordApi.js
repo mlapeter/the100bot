@@ -134,7 +134,6 @@ module.exports = class DiscordApi {
 
   async embedGamingSessionWithReactions(interaction, gaming_session) {
     console.log("In embedGamingSessionWithReactions");
-    console.log(interaction);
 
     const row = new MessageActionRow().addComponents(
       new MessageButton()

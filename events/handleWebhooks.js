@@ -100,7 +100,8 @@ module.exports = (client) => {
 
       // for the string existingEmbed.url, parse out the id
       const idRegex = /\/([^\/]+)$/;
-      const id = existingEmbed.url.match(idRegex)[1];
+      const idMatch = existingEmbed?.url?.match(idRegex);
+      const id = idMatch && idMatch[1];
       if (!id) {
         console.log("NO ID FOUND");
         return;

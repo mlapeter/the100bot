@@ -8,7 +8,10 @@ const { MessageEmbed } = require("discord.js");
 const _ = require("lodash");
 
 module.exports = {
-  data: new SlashCommandBuilder().setName("create").setDescription("Create a new gaming session."),
+  data: new SlashCommandBuilder()
+    .setName("create")
+    .setDescription("Create a new gaming session.")
+    .addStringOption((option) => option.setName("game").setDescription("The name of the game.")),
   async execute(interaction) {
     // try {
     // return if user is in a DM channel
@@ -18,8 +21,10 @@ module.exports = {
 
     await interaction.deferReply();
 
+    let game = interaction.options.getString("input");
+
     let json = null;
-    let game = null;
+    // let game = null;
     let activity = null;
 
     // FETCH USERS PRIMARY GAME //
@@ -36,20 +41,19 @@ module.exports = {
     }
 
     // USER INPUTS GAME STRING //
-    const helpEmbed = await discordApi.embedText(
-      interaction,
-      "",
-      "Type part of the game name like `apex` or `destiny 2`."
-    );
-
-    // const finishedHelpEmbed = await interaction.reply({ embeds: [helpEmbed], ephemeral: true });
-
-    game = await discordApi.getTextResponse(interaction);
+    if (!game || game == "none") {
+      console.log("No game selected");
+      const helpEmbed = await discordApi.embedText(
+        interaction,
+        "",
+        "Type part of the game name like `apex` or `destiny 2`."
+      );
+      game = await discordApi.getTextResponse(interaction);
+      await helpEmbed.delete();
+    }
 
     console.log("GAME IS:");
     console.log(game);
-    await helpEmbed.delete();
-
     if (!game || game == "cancel") {
       return;
     }
