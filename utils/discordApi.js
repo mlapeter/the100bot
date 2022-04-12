@@ -116,110 +116,126 @@ module.exports = class DiscordApi {
   }
 
   async embedGamingSession(interaction, gaming_session) {
-    const embed = new MessageEmbed()
-      .setTitle(gaming_session.title)
-      .setURL(gaming_session.url)
-      .setDescription(gaming_session.description)
-      .setColor(gaming_session.color);
-    console.log("EMBED:");
-    console.log(embed);
-    return await interaction.channel.send({ embeds: [embed] });
+    try {
+      const embed = new MessageEmbed()
+        .setTitle(gaming_session.title)
+        .setURL(gaming_session.url)
+        .setDescription(gaming_session.description)
+        .setColor(gaming_session.color);
+      console.log("EMBED:");
+      console.log(embed);
+      return await interaction.channel.send({ embeds: [embed] });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async embedGamingSessionWithReactions(interaction, gaming_session) {
-    console.log("In embedGamingSessionWithReactions");
+    try {
+      console.log("In embedGamingSessionWithReactions");
 
-    const row = new MessageActionRow().addComponents(
-      new MessageButton()
-        .setCustomId("join-" + gaming_session.id.toString())
-        .setLabel("Join")
-        .setStyle("PRIMARY"),
-      new MessageButton()
-        .setCustomId("leave-" + gaming_session.id.toString())
-        .setLabel("Leave")
-        .setStyle("SECONDARY")
-      // new MessageButton()
-      //   .setCustomId("refresh-" + gaming_session.id.toString())
-      //   .setLabel("")
-      //   .setEmoji("🔄")
-      //   .setStyle("SECONDARY")
-    );
+      const row = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setCustomId("join-" + gaming_session.id.toString())
+          .setLabel("Join")
+          .setStyle("PRIMARY"),
+        new MessageButton()
+          .setCustomId("leave-" + gaming_session.id.toString())
+          .setLabel("Leave")
+          .setStyle("SECONDARY")
+        // new MessageButton()
+        //   .setCustomId("refresh-" + gaming_session.id.toString())
+        //   .setLabel("")
+        //   .setEmoji("🔄")
+        //   .setStyle("SECONDARY")
+      );
 
-    const embed = new MessageEmbed()
-      .setTitle(":calendar_spiral: " + gaming_session.title)
-      .setURL(gaming_session.url)
-      .setDescription(gaming_session.description)
-      .setColor(gaming_session.color);
-    // .setFooter("✅ Join | 📝 Edit | Created by " + msg.author.username);
-    const finishedEmbed = await interaction.channel.send({ embeds: [embed], components: [row] });
+      const embed = new MessageEmbed()
+        .setTitle(":calendar_spiral: " + gaming_session.title)
+        .setURL(gaming_session.url)
+        .setDescription(gaming_session.description)
+        .setColor(gaming_session.color);
+      // .setFooter("✅ Join | 📝 Edit | Created by " + msg.author.username);
+      const finishedEmbed = await interaction.channel.send({ embeds: [embed], components: [row] });
 
-    // const finishedEmbed = await interaction.reply({ embeds: [embed], components: [row] });
+      // const finishedEmbed = await interaction.reply({ embeds: [embed], components: [row] });
 
-    // emoji for plus
-    // const plus = await finishedEmbed.react("➕");
-    // const minus = await finishedEmbed.react("➖");
+      // emoji for plus
+      // const plus = await finishedEmbed.react("➕");
+      // const minus = await finishedEmbed.react("➖");
 
-    // await finishedEmbed.react("✅");
-    // await finishedEmbed.react("📝");
+      // await finishedEmbed.react("✅");
+      // await finishedEmbed.react("📝");
 
-    await api.postAction({
-      action: "update_gaming_session",
-      interaction: interaction,
-      body: {
-        gaming_session_id: gaming_session.id,
-        embed_id: finishedEmbed.id,
-        channel_id: interaction.channel.id,
-      },
-    });
+      await api.postAction({
+        action: "update_gaming_session",
+        interaction: interaction,
+        body: {
+          gaming_session_id: gaming_session.id,
+          embed_id: finishedEmbed.id,
+          channel_id: interaction.channel.id,
+        },
+      });
 
-    return;
+      return;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async convertEmbedToGamingSessionWithReactions(message, messageContent, embed, gamingSessionId) {
-    console.log("In convertEmbedToGamingSessionWithReactions");
+    try {
+      console.log("In convertEmbedToGamingSessionWithReactions");
 
-    const row = new MessageActionRow().addComponents(
-      new MessageButton()
-        .setCustomId("join-" + gamingSessionId.toString())
-        .setLabel("Join")
-        .setStyle("PRIMARY"),
-      new MessageButton()
-        .setCustomId("leave-" + gamingSessionId.toString())
-        .setLabel("Leave")
-        .setStyle("SECONDARY")
-      // new MessageButton()
-      //   .setCustomId("refresh-" + gamingSessionId.toString())
-      //   .setLabel("Refresh")
-      //   .setStyle("SECONDARY")
-    );
+      const row = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setCustomId("join-" + gamingSessionId.toString())
+          .setLabel("Join")
+          .setStyle("PRIMARY"),
+        new MessageButton()
+          .setCustomId("leave-" + gamingSessionId.toString())
+          .setLabel("Leave")
+          .setStyle("SECONDARY")
+        // new MessageButton()
+        //   .setCustomId("refresh-" + gamingSessionId.toString())
+        //   .setLabel("Refresh")
+        //   .setStyle("SECONDARY")
+      );
 
-    const newEmbed = new MessageEmbed()
-      .setTitle(":calendar_spiral: " + embed.title)
-      .setURL(embed.url)
-      .setDescription(embed.description)
-      .setColor(embed.color);
-    // .setFooter("✅ Join | 📝 Edit");
-    // const finishedEmbed = await msg.embed(newEmbed);
-    // return newEmbed;
+      const newEmbed = new MessageEmbed()
+        .setTitle(":calendar_spiral: " + embed.title)
+        .setURL(embed.url)
+        .setDescription(embed.description)
+        .setColor(embed.color);
+      // .setFooter("✅ Join | 📝 Edit");
+      // const finishedEmbed = await msg.embed(newEmbed);
+      // return newEmbed;
 
-    const finishedEmbed = await message.channel.send({
-      content: messageContent ? messageContent : "TESTING",
-      embeds: [newEmbed],
-      components: [row],
-    });
-    return finishedEmbed;
+      const finishedEmbed = await message.channel.send({
+        content: messageContent ? messageContent : "TESTING",
+        embeds: [newEmbed],
+        components: [row],
+      });
+      return finishedEmbed;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async embedGamingSessionDynamic(gaming_session, receivedEmbed = null) {
-    const embed = new MessageEmbed(receivedEmbed)
-      .setTitle(":calendar_spiral: " + gaming_session.title)
-      .setURL(gaming_session.url)
-      .setDescription(gaming_session.description)
-      .setColor(gaming_session.color);
-    // .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
-    console.log("embed created in embedGamingSessionDynamic: ");
-    console.log(embed);
-    return embed;
+    try {
+      const embed = new MessageEmbed(receivedEmbed)
+        .setTitle(":calendar_spiral: " + gaming_session.title)
+        .setURL(gaming_session.url)
+        .setDescription(gaming_session.description)
+        .setColor(gaming_session.color);
+      // .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
+      console.log("embed created in embedGamingSessionDynamic: ");
+      console.log(embed);
+      return embed;
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 
