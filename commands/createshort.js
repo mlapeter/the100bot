@@ -9,7 +9,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("c")
     .setDescription("Quickly create a simple event!")
-    .addStringOption((option) => option.setName("input").setDescription("The input to echo back")),
+    .addStringOption((option) => option.setName("input").setDescription("event name and when it starts.")),
   async execute(interaction) {
     const value = interaction.options.getString("input");
 

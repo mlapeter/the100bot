@@ -21,7 +21,7 @@ module.exports = {
 
     await interaction.deferReply();
 
-    let game = interaction.options.getString("input");
+    let game = interaction.options.getString("game");
 
     let json = null;
     // let game = null;
