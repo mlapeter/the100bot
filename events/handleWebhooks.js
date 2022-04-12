@@ -7,149 +7,147 @@ const discordApi = new DiscordApi();
 // listen for webhooks received from the100.io and log to console
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
-    // try {
-
-    if (!message.webhookId) {
-      return;
-    }
-
-    console.log("WEBHOOK RECEIVED");
-    // console.log(message);
-
-    // return unless the message is from the100.io
-    const the100botNames = ["the100bot", "the100staging", "The100.io"];
-    if (!the100botNames.includes(message.author.username)) {
-      return;
-    }
-
-    // if message.content includes 'jump to' then we link to existing embed and update it
-    if (message.content.includes("jump to") || message.content.includes("deleted")) {
-      console.log("JUMP TO RECEIVED");
-      // parse out the url in the message
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const url = message.content.match(urlRegex)[0];
-      // parse out the string after the very last slash in the url
-      const idRegex = /\/([^\/]+)$/;
-      const messageId = url.match(idRegex)[1];
-      const idStripped = messageId.replace(")", "");
-      console.log(idStripped);
-
-      // const channelId = url.match(idRegex)[0];
-      // console.log(channelId);
-      // strip out any slashes from channelId
-      // const channelIdStripped = channelId.replace(/\//g, "").replace(")", "");
-      // console.log("channelIdStripped: ");
-      // console.log(channelIdStripped);
-
-      // parse out the string between the second to last slash and last slash in the url
-      const embedIdRegex = /\/([^\/]+)\/([^\/]+)$/;
-      const channelId = url.match(embedIdRegex)[1];
-      console.log("channelIdStripped: ");
-      console.log(channelId);
-
-      // find the message in the guild with the id or return if not found
-      const guild = client.guilds.cache.find((guild) => guild.id === message.guildId);
-      const channel = guild.channels.cache.find((channel) => channel.id === channelId);
-      const existingEmbedMessage = await channel.messages.fetch(idStripped);
-      console.log("EXISTING EMBED MESSAGE:");
-      console.log(existingEmbedMessage);
-
-      // find the message in the channel with the id or return if not found
-      // const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
-      if (!existingEmbedMessage) {
-        return;
-      }
-      const existingEmbed = existingEmbedMessage.embeds[0];
-
-      console.log("MESSAGE FOUND:");
-      console.log(existingEmbedMessage.content);
-
-      // wait 2 seconds to allow the message to be fetched then refesh gaming session
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const json = await api.postReaction({
-        action: "refresh_gaming_session",
-        msg: existingEmbedMessage,
-        user: existingEmbedMessage.author,
-        body: {},
-      });
-      const { notice, gaming_session } = json;
-
-      if (!gaming_session) {
-        console.log("NO GAMING SESSION FOUND, DELETING EMBED");
-        await existingEmbedMessage.delete();
-
-        return;
-      } else {
-        console.log("GAMING SESSION FOUND");
-        console.log(gaming_session);
-        console.log(notice);
-      }
-
-      // update the message with the new embed
-      const newEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, existingEmbed);
-      await existingEmbedMessage.edit({ embeds: [newEmbed] });
-    } else {
-      // Otherwise, we create a new embed
-
-      // get the message's embed
-      const existingEmbed = message.embeds[0];
-      if (!existingEmbed || !existingEmbed.url) {
-        console.log("NO EMBED FOUND");
+    try {
+      if (!message.webhookId) {
         return;
       }
 
-      // for the string existingEmbed.url, parse out the id
-      const idRegex = /\/([^\/]+)$/;
-      const idMatch = existingEmbed?.url?.match(idRegex);
-      const id = idMatch && idMatch[1];
-      if (!id) {
-        console.log("NO ID FOUND");
-        return;
-      }
-      const gamingSessionId = id.split("?")[0];
-      if (!gamingSessionId) {
-        console.log("NO GAMING SESSION ID FOUND");
+      console.log("WEBHOOK RECEIVED");
+      // console.log(message);
+
+      // return unless the message is from the100.io
+      const the100botNames = ["the100bot", "the100staging", "The100.io"];
+      if (!the100botNames.includes(message.author.username)) {
         return;
       }
 
-      // check if we have permission to edit embeds
-      const permissions = message.channel.permissionsFor(client.user);
-      if (!permissions.has("MANAGE_MESSAGES")) {
-        console.log("NO MANAGE MESSAGES PERMISSION");
+      // if message.content includes 'jump to' then we link to existing embed and update it
+      if (message.content.includes("jump to") || message.content.includes("deleted")) {
+        console.log("JUMP TO RECEIVED");
+        // parse out the url in the message
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const url = message.content.match(urlRegex)[0];
+        // parse out the string after the very last slash in the url
+        const idRegex = /\/([^\/]+)$/;
+        const messageId = url.match(idRegex)[1];
+        const idStripped = messageId.replace(")", "");
+        console.log(idStripped);
 
-        const embed = new MessageEmbed()
-          .setTitle("We've updated The100bot!")
-          .setDescription(
-            `You can now use buttons to join/leave games! But first you've got to re-add the bot from your group page with new permissions so we can edit embeds: https://www.the100.io`
-          )
-          .setColor("#ff0000");
+        // const channelId = url.match(idRegex)[0];
+        // console.log(channelId);
+        // strip out any slashes from channelId
+        // const channelIdStripped = channelId.replace(/\//g, "").replace(")", "");
+        // console.log("channelIdStripped: ");
+        // console.log(channelIdStripped);
 
-        await message.channel.send(message.content, { embed: embed });
-      } else {
-        console.log("HAS EDIT PERMISSION, CREATING NEW EMBED FOR GAMING SESSION: " + gamingSessionId);
+        // parse out the string between the second to last slash and last slash in the url
+        const embedIdRegex = /\/([^\/]+)\/([^\/]+)$/;
+        const channelId = url.match(embedIdRegex)[1];
+        console.log("channelIdStripped: ");
+        console.log(channelId);
 
-        const newEmbed = await discordApi.convertEmbedToGamingSessionWithReactions(
-          message,
-          message.content,
-          existingEmbed,
-          gamingSessionId
-        );
+        // find the message in the guild with the id or return if not found
+        const guild = client.guilds.cache.find((guild) => guild.id === message.guildId);
+        const channel = guild.channels.cache.find((channel) => channel.id === channelId);
+        const existingEmbedMessage = await channel.messages.fetch(idStripped);
+        console.log("EXISTING EMBED MESSAGE:");
+        console.log(existingEmbedMessage);
 
-        await message.delete();
+        // find the message in the channel with the id or return if not found
+        // const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
+        if (!existingEmbedMessage) {
+          return;
+        }
+        const existingEmbed = existingEmbedMessage.embeds[0];
 
-        await api.postAction({
-          action: "update_gaming_session",
-          interaction: newEmbed,
-          body: {
-            gaming_session_id: gamingSessionId,
-            embed_id: newEmbed.id,
-          },
+        console.log("MESSAGE FOUND:");
+        console.log(existingEmbedMessage.content);
+
+        // wait 2 seconds to allow the message to be fetched then refesh gaming session
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const json = await api.postReaction({
+          action: "refresh_gaming_session",
+          msg: existingEmbedMessage,
+          user: existingEmbedMessage.author,
+          body: {},
         });
-      }
-    }
+        const { notice, gaming_session } = json;
 
-    // } catch (e) {
-    //   console.log(e);
-    // }
+        if (!gaming_session) {
+          console.log("NO GAMING SESSION FOUND, DELETING EMBED");
+          await existingEmbedMessage.delete();
+
+          return;
+        } else {
+          console.log("GAMING SESSION FOUND");
+          console.log(gaming_session);
+          console.log(notice);
+        }
+
+        // update the message with the new embed
+        const newEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, existingEmbed);
+        await existingEmbedMessage.edit({ embeds: [newEmbed] });
+      } else {
+        // Otherwise, we create a new embed
+
+        // get the message's embed
+        const existingEmbed = message.embeds[0];
+        if (!existingEmbed || !existingEmbed.url) {
+          console.log("NO EMBED FOUND");
+          return;
+        }
+
+        // for the string existingEmbed.url, parse out the id
+        const idRegex = /\/([^\/]+)$/;
+        const idMatch = existingEmbed?.url?.match(idRegex);
+        const id = idMatch && idMatch[1];
+        if (!id) {
+          console.log("NO ID FOUND");
+          return;
+        }
+        const gamingSessionId = id.split("?")[0];
+        if (!gamingSessionId) {
+          console.log("NO GAMING SESSION ID FOUND");
+          return;
+        }
+
+        // check if we have permission to edit embeds
+        const permissions = message.channel.permissionsFor(client.user);
+        if (!permissions.has("MANAGE_MESSAGES")) {
+          console.log("NO MANAGE MESSAGES PERMISSION");
+
+          const embed = new MessageEmbed()
+            .setTitle("We've updated The100bot!")
+            .setDescription(
+              `You can now use buttons to join/leave games! But first you've got to re-add the bot from your group page with new permissions so we can edit embeds: https://www.the100.io`
+            )
+            .setColor("#ff0000");
+
+          await message.channel.send(message.content, { embed: embed });
+        } else {
+          console.log("HAS EDIT PERMISSION, CREATING NEW EMBED FOR GAMING SESSION: " + gamingSessionId);
+
+          const newEmbed = await discordApi.convertEmbedToGamingSessionWithReactions(
+            message,
+            message.content,
+            existingEmbed,
+            gamingSessionId
+          );
+
+          await message.delete();
+
+          await api.postAction({
+            action: "update_gaming_session",
+            interaction: newEmbed,
+            body: {
+              gaming_session_id: gamingSessionId,
+              embed_id: newEmbed.id,
+            },
+          });
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
   });
 };

@@ -113,12 +113,6 @@ module.exports = class DiscordApi {
     });
 
     return embed;
-
-    // try {
-    //   return embed
-    // } catch (e) {
-    //   console.log(e)
-    // }
   }
 
   async embedGamingSession(interaction, gaming_session) {
