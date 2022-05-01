@@ -21,6 +21,22 @@ module.exports = (client) => {
         return;
       }
 
+      console.log(message);
+      // return if message does not need an embed with buttons
+
+      // return if message has an embed with a title that contains "new group menber"
+      if (message.embeds.length > 0) {
+        const embed = message.embeds[0];
+        if (
+          embed.title &&
+          (embed.title.toLowerCase().includes("new group member") ||
+            embed.title.toLowerCase().includes("new membership request"))
+        ) {
+          console.log("REGULAR MESSAGE NO EMBED NEEDED, SKIPPING");
+          return;
+        }
+      }
+
       // if message.content includes 'jump to' then we link to existing embed and update it
       if (message.content.includes("jump to") || message.content.includes("deleted")) {
         console.log("JUMP TO RECEIVED");
@@ -32,13 +48,6 @@ module.exports = (client) => {
         const messageId = url.match(idRegex)[1];
         const idStripped = messageId.replace(")", "");
         console.log(idStripped);
-
-        // const channelId = url.match(idRegex)[0];
-        // console.log(channelId);
-        // strip out any slashes from channelId
-        // const channelIdStripped = channelId.replace(/\//g, "").replace(")", "");
-        // console.log("channelIdStripped: ");
-        // console.log(channelIdStripped);
 
         // parse out the string between the second to last slash and last slash in the url
         const embedIdRegex = /\/([^\/]+)\/([^\/]+)$/;

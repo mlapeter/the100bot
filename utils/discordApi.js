@@ -212,7 +212,7 @@ module.exports = class DiscordApi {
       // return newEmbed;
 
       const finishedEmbed = await message.channel.send({
-        content: messageContent ? messageContent : "TESTING",
+        content: messageContent ? messageContent : "",
         embeds: [newEmbed],
         components: [row],
       });
