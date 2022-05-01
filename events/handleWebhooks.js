@@ -8,7 +8,7 @@ const discordApi = new DiscordApi();
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
     try {
-      if (!message.webhookId) {
+      if (!message.webhookId || message.type !== "DEFAULT") {
         return;
       }
 
@@ -22,6 +22,8 @@ module.exports = (client) => {
       }
 
       console.log(message);
+
+      // console.log(message);
       // return if message does not need an embed with buttons
 
       // return if message has an embed with a title that contains "new group menber"
@@ -63,7 +65,6 @@ module.exports = (client) => {
         console.log(existingEmbedMessage);
 
         // find the message in the channel with the id or return if not found
-        // const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
         if (!existingEmbedMessage) {
           return;
         }
@@ -83,8 +84,8 @@ module.exports = (client) => {
         const { notice, gaming_session } = json;
 
         if (!gaming_session) {
-          console.log("NO GAMING SESSION FOUND, DELETING EMBED");
-          await existingEmbedMessage.delete();
+          console.log("NO GAMING SESSION FOUND");
+          // await existingEmbedMessage.delete();
 
           return;
         } else {
