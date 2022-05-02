@@ -44,14 +44,15 @@ module.exports = {
 
       const substrings = ["reserve", "waitlist", "You just joined", "Game left"];
       if (gaming_session || (notice && substrings.some((v) => notice.includes(v)))) {
-        console.log("CHECKING PERMISSIONS...");
+        // console.log("CHECKING PERMISSIONS...");
         // check if we have edit message permissions
-        if (!interaction.message.channel.permissionsFor(interaction.user).has("MANAGE_MESSAGES")) {
-          console.log("NO PERMISSIONS");
-          return interaction.reply(
-            "The bot doesn't have permissions to edit messages, please reinstall with full permissions."
-          );
-        }
+
+        // if (!interaction.message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
+        //   console.log("NO PERMISSIONS");
+        //   return interaction.reply(
+        //     "The bot doesn't have permissions to edit messages, please reinstall with full permissions."
+        //   );
+        // }
 
         const receivedEmbed = interaction.message.embeds[0];
         const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
@@ -62,8 +63,33 @@ module.exports = {
         console.log(notice);
         await interaction.reply({ content: notice ? notice : "An error ocurred, please contact us.", ephemeral: true });
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      sendError(error, interaction);
     }
   },
+};
+
+const sendError = async (error, interaction) => {
+  try {
+    console.error(error);
+    console.log(interaction);
+    const permissions = interaction.channel?.permissionsFor(interaction.client.user);
+    interaction.client.users.cache
+      .get(process.env.OWNER_DISCORD_ID)
+      .send(
+        `Error for command: **${interaction.customId}** with proper permissions: **${permissions?.has(
+          "MANAGE_MESSAGES"
+        )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
+          interaction.user
+        } - ${interaction.user?.id}`
+      );
+
+    interaction.client.users.cache.get(process.env.OWNER_DISCORD_ID).send(error);
+
+    await interaction.channel.send(
+      "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
+    );
+  } catch (error) {
+    console.error(error);
+  }
 };

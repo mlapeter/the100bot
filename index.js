@@ -27,10 +27,16 @@ const eventFiles = fs.readdirSync("./events").filter((file) => file.endsWith(".j
 
 for (const file of eventFiles) {
   const event = require(`./events/${file}`);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args));
+  try {
+    if (event.once) {
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
+    }
+  } catch (error) {
+    console.log("ERROR: ");
+    console.error(error);
+    sendError(error, interaction);
   }
 }
 
@@ -44,29 +50,6 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-// if (process.env.THE100_API_BASE_URL != "http://localhost:3000/api/v2/") {
-//   console.log("Connecting to database...");
-//   const sequelize = new Sequelize(process.env.DATABASE_URL, {
-//     dialectOptions: {
-//       ssl: {
-//         require: true,
-//         rejectUnauthorized: false,
-//       },
-//     },
-//   });
-
-//   sequelize
-//     .authenticate()
-//     .then((response) => {
-//       console.log("Database connected.");
-//     })
-//     .catch((e) => {
-//       console.error("Unable to connect to the database:", e);
-//     });
-
-//   client.setProvider(new SequelizeProvider(sequelize));
-// }
-
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}! (${client.user.id})`);
   client.user.setActivity("with The100.io!");
@@ -79,7 +62,7 @@ client.on("error", (error) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  // console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
+  console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
 
   if (!interaction.isCommand()) return;
 
@@ -90,10 +73,36 @@ client.on("interactionCreate", async (interaction) => {
   try {
     await command.execute(interaction);
   } catch (error) {
+    console.log("ERROR: ");
     console.error(error);
-    // await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
+    sendError(error, interaction);
   }
 });
+
+const sendError = async (error, interaction) => {
+  try {
+    console.error(error);
+    console.log(interaction);
+    const permissions = interaction.channel?.permissionsFor(client.user);
+    client.users.cache
+      .get(process.env.OWNER_DISCORD_ID)
+      .send(
+        `Error for command: **${interaction.commandName}** with proper permissions: **${permissions?.has(
+          "MANAGE_MESSAGES"
+        )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
+          interaction.user
+        } - ${interaction.user?.id}`
+      );
+
+    client.users.cache.get(process.env.OWNER_DISCORD_ID).send(error);
+
+    await interaction.channel.send(
+      "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
+    );
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 client
   .login(process.env.DISCORD_BOT_TOKEN)
