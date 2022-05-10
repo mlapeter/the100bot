@@ -8,7 +8,7 @@ const discordApi = new DiscordApi();
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
     try {
-      if (!message.webhookId) {
+      if (!message.webhookId || message.type !== "DEFAULT") {
         return;
       }
 
@@ -19,6 +19,24 @@ module.exports = (client) => {
       const the100botNames = ["the100bot", "the100staging", "The100.io"];
       if (!the100botNames.includes(message.author.username)) {
         return;
+      }
+
+      console.log(message);
+
+      // console.log(message);
+      // return if message does not need an embed with buttons
+
+      // return if message has an embed with a title that contains "new group menber"
+      if (message.embeds.length > 0) {
+        const embed = message.embeds[0];
+        if (
+          embed.title &&
+          (embed.title.toLowerCase().includes("new group member") ||
+            embed.title.toLowerCase().includes("new membership request"))
+        ) {
+          console.log("REGULAR MESSAGE NO EMBED NEEDED, SKIPPING");
+          return;
+        }
       }
 
       // if message.content includes 'jump to' then we link to existing embed and update it
@@ -32,13 +50,6 @@ module.exports = (client) => {
         const messageId = url.match(idRegex)[1];
         const idStripped = messageId.replace(")", "");
         console.log(idStripped);
-
-        // const channelId = url.match(idRegex)[0];
-        // console.log(channelId);
-        // strip out any slashes from channelId
-        // const channelIdStripped = channelId.replace(/\//g, "").replace(")", "");
-        // console.log("channelIdStripped: ");
-        // console.log(channelIdStripped);
 
         // parse out the string between the second to last slash and last slash in the url
         const embedIdRegex = /\/([^\/]+)\/([^\/]+)$/;
@@ -54,7 +65,6 @@ module.exports = (client) => {
         console.log(existingEmbedMessage);
 
         // find the message in the channel with the id or return if not found
-        // const existingEmbedMessage = await message.channel.messages.fetch(idStripped);
         if (!existingEmbedMessage) {
           return;
         }
@@ -74,8 +84,8 @@ module.exports = (client) => {
         const { notice, gaming_session } = json;
 
         if (!gaming_session) {
-          console.log("NO GAMING SESSION FOUND, DELETING EMBED");
-          await existingEmbedMessage.delete();
+          console.log("NO GAMING SESSION FOUND");
+          // await existingEmbedMessage.delete();
 
           return;
         } else {
