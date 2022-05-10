@@ -44,16 +44,6 @@ module.exports = {
 
       const substrings = ["reserve", "waitlist", "You just joined", "Game left"];
       if (gaming_session || (notice && substrings.some((v) => notice.includes(v)))) {
-        // console.log("CHECKING PERMISSIONS...");
-        // check if we have edit message permissions
-
-        // if (!interaction.message.channel.permissionsFor(client.user).has("MANAGE_MESSAGES")) {
-        //   console.log("NO PERMISSIONS");
-        //   return interaction.reply(
-        //     "The bot doesn't have permissions to edit messages, please reinstall with full permissions."
-        //   );
-        // }
-
         const receivedEmbed = interaction.message.embeds[0];
         const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
         await interaction.update({ embeds: [exampleEmbed] });
