@@ -7,9 +7,11 @@ module.exports = class DiscordApi {
   async getTextResponse(interaction) {
     const msg_filter = (m) => m.author.id === interaction.user.id;
     const collected = await interaction.channel.awaitMessages({ filter: msg_filter, max: 1 });
+    const response = collected.first().content;
     console.log("collected: ");
-    console.log(collected.first().content);
-    return collected.first().content;
+    console.log(response);
+    collected.first().delete();
+    return response;
   }
 
   getItemFromReaction(reaction, items) {

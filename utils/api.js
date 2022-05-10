@@ -24,6 +24,8 @@ module.exports = class Api {
     console.log("postAction: ");
     console.log(action);
     console.log("------------------------------------");
+    console.log(interaction.channelId);
+
     // console.log(interaction);
 
     let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
