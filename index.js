@@ -34,7 +34,7 @@ for (const file of eventFiles) {
       client.on(event.name, (...args) => event.execute(...args));
     }
   } catch (error) {
-    console.log("ERROR: ");
+    console.log("EVENT ERROR: ");
     console.error(error);
     sendError(error, interaction);
   }
@@ -71,16 +71,20 @@ client.on("interactionCreate", async (interaction) => {
   if (!command) return;
 
   try {
+    console.log("ABOUT TO EXECUTE COMMAND --------------------------------------------------");
     await command.execute(interaction);
   } catch (error) {
-    console.log("ERROR: ");
+    console.log("interactionCreate in index.js ERROR: ");
     console.error(error);
-    sendError(error, interaction);
+    if (error && interaction) {
+      sendError(error, interaction);
+    }
   }
 });
 
 const sendError = async (error, interaction) => {
   try {
+    console.log("START SEND ERROR");
     console.error(error);
     console.log(interaction);
     const permissions = interaction.channel?.permissionsFor(client.user);
@@ -94,12 +98,13 @@ const sendError = async (error, interaction) => {
         } - ${interaction.user?.id}`
       );
 
-    client.users.cache.get(process.env.OWNER_DISCORD_ID).send(error);
+    client.users.cache.get(process.env.OWNER_DISCORD_ID).send(error.toString());
 
     await interaction.channel.send(
       "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
     );
   } catch (e) {
+    console.log("sendError ERROR: ");
     console.log(e);
   }
 };

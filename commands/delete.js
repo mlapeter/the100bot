@@ -22,7 +22,7 @@ module.exports = {
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Gaming session deleted.", ephemeral: true });
     } else {
-      console.log("ERROR:");
+      console.log("DELETE ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });

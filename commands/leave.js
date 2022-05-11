@@ -26,7 +26,7 @@ module.exports = {
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Game left.", ephemeral: true });
     } else {
-      console.log("ERROR:");
+      console.log("LEAVE ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });

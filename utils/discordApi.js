@@ -10,7 +10,12 @@ module.exports = class DiscordApi {
     const response = collected.first().content;
     console.log("collected: ");
     console.log(response);
-    collected.first().delete();
+    try {
+      collected.first().delete();
+    } catch (e) {
+      console.log("ERROR DELETING MESSAGE");
+      console.log(e);
+    }
     return response;
   }
 

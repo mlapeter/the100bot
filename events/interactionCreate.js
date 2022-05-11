@@ -49,7 +49,7 @@ module.exports = {
         await interaction.update({ embeds: [exampleEmbed] });
         return;
       } else {
-        console.log("ERROR:");
+        console.log("interactionCreate.js ERROR:");
         console.log(notice);
         await interaction.reply({ content: notice ? notice : "An error ocurred, please contact us.", ephemeral: true });
       }

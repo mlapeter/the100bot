@@ -26,7 +26,7 @@ module.exports = {
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Game Joined!", ephemeral: true });
     } else {
-      console.log("ERROR:");
+      console.log("JOIN ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });

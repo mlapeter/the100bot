@@ -40,6 +40,9 @@ module.exports = class Api {
     };
 
     const res = await this.post(url, data);
+    console.log("RESPONSE:");
+    console.log(res);
+
     if (res.status == 404 || res.status == 401) {
       return interaction.reply(
         "Error: No The100.io group found. Go to <https://www.the100.io/groups/new> to re-add this bot from your group page."
