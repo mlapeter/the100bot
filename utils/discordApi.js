@@ -1,7 +1,16 @@
-const { MessageEmbed, MessageActionRow, MessageButton } = require("discord.js");
-// const { Discord } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const Api = require("./api");
 const api = new Api();
+
+// EmbedBuilder (v14) is stricter than the old MessageEmbed: setters reject
+// empty / null values. These helpers apply a setter only when the value is
+// present so we don't crash on optional fields coming back from the API.
+const setIfPresent = (embed, method, value) => {
+  if (value !== undefined && value !== null && value !== "") {
+    embed[method](value);
+  }
+  return embed;
+};
 
 module.exports = class DiscordApi {
   async getTextResponse(interaction) {
@@ -75,16 +84,17 @@ module.exports = class DiscordApi {
     }
     console.log(description);
 
-    const embed = new MessageEmbed().setTitle(title).setDescription(description.toString()).setColor(0x00ae86);
+    const embed = new EmbedBuilder().setColor(0x00ae86);
+    setIfPresent(embed, "setTitle", title);
+    setIfPresent(embed, "setDescription", description ? description.toString() : null);
     return await interaction.followUp({ embeds: [embed] });
   }
 
   async helpEmbed(msg, title, description) {
     const url = `${process.env.THE100_BASE_URL}gaming_sessions/new`;
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTitle("Create Events")
-      // .setDescription("Create Event")
       .setColor(0x00ae86)
       .addFields(
         {
@@ -100,18 +110,14 @@ module.exports = class DiscordApi {
           value: `[Click to open create page](${url})`,
         }
       );
-    // return await msg.embed(embed1);
     return embed;
   }
 
   async embedTextAndEmojis(interaction, title, description, emojis) {
     const embed = await this.embedText(interaction, title, description);
 
-    // const finishedEmbed = await interaction.followUp({ embeds: [embed] });
-
     emojis.forEach(async (emoji) => {
       try {
-        // await embed.react("1️⃣");
         await embed.react(emoji);
       } catch (e) {
         console.log("Emoji error: ");
@@ -124,11 +130,11 @@ module.exports = class DiscordApi {
 
   async embedGamingSession(interaction, gaming_session) {
     try {
-      const embed = new MessageEmbed()
-        .setTitle(gaming_session.title)
-        .setURL(gaming_session.url)
-        .setDescription(gaming_session.description)
-        .setColor(gaming_session.color);
+      const embed = new EmbedBuilder();
+      setIfPresent(embed, "setTitle", gaming_session.title);
+      setIfPresent(embed, "setURL", gaming_session.url);
+      setIfPresent(embed, "setDescription", gaming_session.description);
+      setIfPresent(embed, "setColor", gaming_session.color);
       console.log("EMBED:");
       console.log(embed);
       return await interaction.channel.send({ embeds: [embed] });
@@ -137,42 +143,31 @@ module.exports = class DiscordApi {
     }
   }
 
+  buildJoinLeaveRow(gamingSessionId) {
+    return new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("join-" + gamingSessionId.toString())
+        .setLabel("Join")
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId("leave-" + gamingSessionId.toString())
+        .setLabel("Leave")
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
+
   async embedGamingSessionWithReactions(interaction, gaming_session) {
     try {
       console.log("In embedGamingSessionWithReactions");
 
-      const row = new MessageActionRow().addComponents(
-        new MessageButton()
-          .setCustomId("join-" + gaming_session.id.toString())
-          .setLabel("Join")
-          .setStyle("PRIMARY"),
-        new MessageButton()
-          .setCustomId("leave-" + gaming_session.id.toString())
-          .setLabel("Leave")
-          .setStyle("SECONDARY")
-        // new MessageButton()
-        //   .setCustomId("refresh-" + gaming_session.id.toString())
-        //   .setLabel("")
-        //   .setEmoji("🔄")
-        //   .setStyle("SECONDARY")
-      );
+      const row = this.buildJoinLeaveRow(gaming_session.id);
 
-      const embed = new MessageEmbed()
-        .setTitle(":calendar_spiral: " + gaming_session.title)
-        .setURL(gaming_session.url)
-        .setDescription(gaming_session.description)
-        .setColor(gaming_session.color);
-      // .setFooter("✅ Join | 📝 Edit | Created by " + msg.author.username);
+      const embed = new EmbedBuilder();
+      setIfPresent(embed, "setTitle", ":calendar_spiral: " + gaming_session.title);
+      setIfPresent(embed, "setURL", gaming_session.url);
+      setIfPresent(embed, "setDescription", gaming_session.description);
+      setIfPresent(embed, "setColor", gaming_session.color);
       const finishedEmbed = await interaction.channel.send({ embeds: [embed], components: [row] });
-
-      // const finishedEmbed = await interaction.reply({ embeds: [embed], components: [row] });
-
-      // emoji for plus
-      // const plus = await finishedEmbed.react("➕");
-      // const minus = await finishedEmbed.react("➖");
-
-      // await finishedEmbed.react("✅");
-      // await finishedEmbed.react("📝");
 
       await api.postAction({
         action: "update_gaming_session",
@@ -194,29 +189,13 @@ module.exports = class DiscordApi {
     try {
       console.log("In convertEmbedToGamingSessionWithReactions");
 
-      const row = new MessageActionRow().addComponents(
-        new MessageButton()
-          .setCustomId("join-" + gamingSessionId.toString())
-          .setLabel("Join")
-          .setStyle("PRIMARY"),
-        new MessageButton()
-          .setCustomId("leave-" + gamingSessionId.toString())
-          .setLabel("Leave")
-          .setStyle("SECONDARY")
-        // new MessageButton()
-        //   .setCustomId("refresh-" + gamingSessionId.toString())
-        //   .setLabel("Refresh")
-        //   .setStyle("SECONDARY")
-      );
+      const row = this.buildJoinLeaveRow(gamingSessionId);
 
-      const newEmbed = new MessageEmbed()
-        .setTitle(":calendar_spiral: " + embed.title)
-        .setURL(embed.url)
-        .setDescription(embed.description)
-        .setColor(embed.color);
-      // .setFooter("✅ Join | 📝 Edit");
-      // const finishedEmbed = await msg.embed(newEmbed);
-      // return newEmbed;
+      const newEmbed = new EmbedBuilder();
+      setIfPresent(newEmbed, "setTitle", ":calendar_spiral: " + embed.title);
+      setIfPresent(newEmbed, "setURL", embed.url);
+      setIfPresent(newEmbed, "setDescription", embed.description);
+      setIfPresent(newEmbed, "setColor", embed.color);
 
       const finishedEmbed = await message.channel.send({
         content: messageContent ? messageContent : "",
@@ -231,12 +210,11 @@ module.exports = class DiscordApi {
 
   async embedGamingSessionDynamic(gaming_session, receivedEmbed = null) {
     try {
-      const embed = new MessageEmbed(receivedEmbed)
-        .setTitle(":calendar_spiral: " + gaming_session.title)
-        .setURL(gaming_session.url)
-        .setDescription(gaming_session.description)
-        .setColor(gaming_session.color);
-      // .setFooter("✅ Join | 📝 Edit | Created by " + user.username);
+      const embed = receivedEmbed ? EmbedBuilder.from(receivedEmbed) : new EmbedBuilder();
+      setIfPresent(embed, "setTitle", ":calendar_spiral: " + gaming_session.title);
+      setIfPresent(embed, "setURL", gaming_session.url);
+      setIfPresent(embed, "setDescription", gaming_session.description);
+      setIfPresent(embed, "setColor", gaming_session.color);
       console.log("embed created in embedGamingSessionDynamic: ");
       console.log(embed);
       return embed;
@@ -245,8 +223,3 @@ module.exports = class DiscordApi {
     }
   }
 };
-
-// http://www.google.com/calendar/event?action=TEMPLATE&text=destiny%202&dates=20220219T191509Z/20220219T201509Z&details=&location=
-
-// determine user's timezone
-// https://sesh.fyi/tz?id=efZBrAHVQW9bkxhdsLsXmf&target=user

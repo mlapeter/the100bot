@@ -1,8 +1,4 @@
-const { RichEmbed } = require("discord.js");
-// const fetch = require("node-fetch");
-// import fetch from 'node-fetch'
-
-const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+// Uses the global fetch built into Node 18+ (no node-fetch dependency needed).
 
 module.exports = class Api {
   async post(url, data) {

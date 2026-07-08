@@ -1,3 +1,4 @@
+const { PermissionsBitField } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -66,17 +67,17 @@ const sendError = async (error, interaction) => {
     const permissions = interaction.channel?.permissionsFor(interaction.client.user);
     interaction.client.users.cache
       .get(process.env.OWNER_DISCORD_ID)
-      .send(
+      ?.send(
         `Error for command: **${interaction.customId}** with proper permissions: **${permissions?.has(
-          "MANAGE_MESSAGES"
+          PermissionsBitField.Flags.ManageMessages
         )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
           interaction.user
         } - ${interaction.user?.id}`
       );
 
-    interaction.client.users.cache.get(process.env.OWNER_DISCORD_ID).send(error);
+    interaction.client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
 
-    await interaction.channel.send(
+    await interaction.channel?.send(
       "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
     );
   } catch (error) {

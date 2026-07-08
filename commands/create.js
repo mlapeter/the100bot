@@ -1,10 +1,9 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
 const chrono = require("chrono-node");
-const { MessageEmbed } = require("discord.js");
 const _ = require("lodash");
 
 module.exports = {

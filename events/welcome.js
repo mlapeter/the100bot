@@ -1,18 +1,19 @@
-const { Permissions } = require("discord.js");
-const { MessageEmbed } = require("discord.js");
+const { PermissionsBitField, EmbedBuilder } = require("discord.js");
 
 module.exports = (client) => {
   console.log("In Welcome.js");
   // send a welcome message when bot is first added to the server
   client.on("guildCreate", async (guild) => {
     try {
-      const members = guild.members.cache.filter((member) => member.permissions.has(Permissions.FLAGS.ADMINISTRATOR));
+      const members = guild.members.cache.filter((member) =>
+        member.permissions.has(PermissionsBitField.Flags.Administrator)
+      );
       console.log("MEMBERS:");
       console.log(members);
 
       const channel = guild.channels.cache.find((channel) => channel.name === "general");
       if (!channel) return;
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setColor("#0099ff")
         .setTitle("Hello from The100bot!")
         .setDescription(
@@ -24,7 +25,7 @@ module.exports = (client) => {
         )
         .setThumbnail(client.user.avatarURL());
       console.log("SENDING WELCOME MESSAGE TO CHANNEL");
-      await channel.send(embed);
+      await channel.send({ embeds: [embed] });
     } catch (e) {
       console.log(e);
     }
@@ -36,10 +37,12 @@ module.exports = (client) => {
       console.log("STARTING SENDING WELCOME DM TO MANAGERS");
 
       // const guild = client.guilds.cache.get(process.env.GUILD_ID);
-      const members = guild.members.cache.filter((member) => member.permissions.has(Permissions.FLAGS.ADMINISTRATOR));
+      const members = guild.members.cache.filter((member) =>
+        member.permissions.has(PermissionsBitField.Flags.Administrator)
+      );
       // send a direct message to each member with manage server permissions
       members.forEach(async (member) => {
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
           .setColor("#0099ff")
           .setTitle("Welcome to The100bot!")
           .setDescription(
@@ -50,7 +53,7 @@ module.exports = (client) => {
           .setThumbnail(client.user.avatarURL())
           .setTimestamp();
         console.log("SENDING WELCOME DM TO MANAGERS");
-        await member.send(embed);
+        await member.send({ embeds: [embed] });
       });
     } catch (e) {
       console.log(e);
