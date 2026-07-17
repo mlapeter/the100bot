@@ -5,8 +5,8 @@ const api = new Api();
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("leave")
-    .setDescription("leave a gaming session.")
-    .addStringOption((option) => option.setName("id").setDescription("The id of the game to leave")),
+    .setDescription("Leave a gaming session.")
+    .addStringOption((option) => option.setName("id").setDescription("The id of the game to leave").setRequired(true)),
 
   async execute(interaction) {
     const gaming_session_id = interaction.options.getString("id");

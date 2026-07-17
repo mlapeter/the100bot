@@ -12,7 +12,12 @@ permissions), the environment variables, hosting, and the one change the
 
 ---
 
-## 1. Create the new Discord application
+## 1. The new Discord application
+
+> **Status (2026-07-17): this exists.** Application **"the100"**, app/client ID
+> `1527400348891742401`, bot user `the100#7393`, Server Members + Message
+> Content intents enabled. The steps below are kept for reference / if it ever
+> has to be recreated.
 
 1. Go to <https://discord.com/developers/applications> → **New Application**.
    Name it (e.g. "The100.io"). Note the **Application ID** — this is the
@@ -57,10 +62,11 @@ For a quick **test-server** invite (bot + commands only, no webhook flow),
 build a URL like:
 
 ```
-https://discord.com/oauth2/authorize?client_id=<APPLICATION_ID>&scope=bot%20applications.commands&permissions=423591438400
+https://discord.com/oauth2/authorize?client_id=1527400348891742401&scope=bot%20applications.commands&permissions=423591438400
 ```
 
-Replace `<APPLICATION_ID>` with your new Application ID. For real production
+(Discord may throw an hCaptcha on the Authorize click — a human has to click
+through it; that's expected, not an error.) For real production
 groups, the invite comes from the100.io's group edit page (which appends the
 webhook scope), so you do **not** hand out a raw URL to group owners.
 
@@ -76,13 +82,14 @@ add/change a command:
 npm run deploy      # == node deploy-commands.js
 ```
 
-It reads `CLIENT_ID` + `DISCORD_BOT_TOKEN` and does a global
-`Routes.applicationCommands(CLIENT_ID)` PUT (REST v10). Global registration can
-take up to ~1 hour to propagate. For instant iteration on a single test
-server, set `GUILD_ID` and switch the call in `deploy-commands.js` to
-`Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID)` (a commented pointer is
-in the file). The 10 commands registered: `/count`, `/create`, `/c`,
-`/delete`, `/games`, `/help`, `/join`, `/leave`, `/link`, `/the100status`.
+It reads `CLIENT_ID` + `DISCORD_BOT_TOKEN` and PUTs via REST v10. **If
+`GUILD_ID` is set it registers to that guild only** (instant — use for dev);
+**unset, it registers globally** (can take up to ~1 hour to propagate). For a
+production rollout, unset `GUILD_ID` (or run with `GUILD_ID=` empty) so
+commands go global. Guild-scoped registration requires the bot to already be
+**in** that guild (otherwise: 403 Missing Access). The 10 commands registered:
+`/count`, `/create`, `/c`, `/delete`, `/games`, `/help`, `/join`, `/leave`,
+`/link`, `/the100status`.
 
 ---
 
@@ -97,7 +104,7 @@ them as Heroku config vars. Every var referenced by the live code:
 | `CLIENT_ID` | yes (for deploy) | Application ID. Used by `deploy-commands.js` to register slash commands. |
 | `THE100_API_TOKEN` | yes | the100.io **user API token** sent as `Authorization: Bearer <token>` on every API call. Must belong to the dedicated bot user account (the one `User#is_the100bot?` returns true for) or an api-whitelisted account — see `pwntastic/app/controllers/api/v2/base_controller.rb#authenticate_bot_user`. Generate from that account's edit-profile page. |
 | `THE100_API_BASE_URL` | yes | API base, **with trailing slash**, e.g. `https://www.the100.io/api/v2/` (prod) or `https://pwn-staging.herokuapp.com/api/v2/` (staging — note staging has no DB attached, see pwntastic CLAUDE.md). The bot posts to `${THE100_API_BASE_URL}discordbots/<action>`. |
-| `THE100_BASE_URL` | recommended | Web base **with trailing slash**, e.g. `https://www.the100.io/`. Only used by `/help` / `/c` embeds to link to `gaming_sessions/new`. If unset those links render malformed but nothing crashes. |
+| `THE100_BASE_URL` | recommended | Web base **with trailing slash**, e.g. `https://www.the100.io/`. Used by `/help` / `/c` embeds and by `/link` to build the account-link URL (defaults to `https://www.the100.io/` if unset). |
 | `OWNER_DISCORD_ID` | optional | Discord user ID that receives DM error reports. Safe to leave unset (error DMs are best-effort / optional-chained). |
 | `GUILD_ID` | optional | Only for guild-scoped command registration during testing. |
 
@@ -146,9 +153,19 @@ loaded and only auth is missing.
 
 ## 6. pwntastic (Rails / the100.io) side changes
 
-Good news: **there are no hardcoded bot/application IDs in the Rails source.**
-The Discord integration is driven entirely by env vars, so re-launching under a
-new application is a config change, not a code change. On the **`pwntastic`
+**One code change is required** (correcting the earlier claim in this doc that
+there were none): `app/models/discordbot.rb`'s `discord_linked_user` hardcoded
+the *deleted* bot users (`the100#0663` / `the100staging#7994`). The bot's own
+API calls — `update_gaming_session` after converting a webhook post into a
+Join/Leave button embed, and `refresh_gaming_session` — arrive with the bot's
+identity and rely on that check; under the new bot user they'd be rejected and
+the embed conversion/refresh flow would silently break. Fixed in pwntastic PR
+**#614** (`discordbot-new-bot-identity` branch): the bot is now recognized by
+`discord_id == ENV['DISCORD_CLIENT_ID']`, with optional
+`DISCORD_BOT_TAG=the100#7393` as a fallback. Merge/deploy that PR as part of
+the cutover.
+
+Beyond that, the integration is driven by env vars. On the **`pwntastic`
 Heroku app**, update these config vars to the **new** application's values:
 
 | pwntastic config var | What it is |
@@ -156,6 +173,7 @@ Heroku app**, update these config vars to the **new** application's values:
 | `DISCORD_CLIENT_ID` | New Application ID. Used to build every "add the bot" OAuth URL (`app/models/discordbot.rb`, `app/views/groups/*`, `app/views/discordbots/index.html.erb`). |
 | `DISCORD_CLIENT_SECRET` | New app's OAuth2 client secret (Discord portal → OAuth2). Used in `Discordbot.exchange_code` to swap the auth code for a token. |
 | `DISCORD_TOKEN` | New bot token. Used in `discordbots_controller#groupauth` for `Authorization: Bot <token>` calls to the Discord REST API. (This is the same value as the bot's `DISCORD_BOT_TOKEN`, just named differently on the Rails side.) |
+| `DISCORD_BOT_TAG` | Optional: `the100#7393`. Fallback bot-identity match in `Discordbot.bot_identity?` (PR #614) for calls where `discord_id` is missing. |
 
 The OAuth redirect URIs the Rails app uses must also be added to the **new**
 application's **OAuth2 → Redirects** allow-list in the Discord portal:

@@ -179,8 +179,7 @@ module.exports = {
     if (notice.includes("Gaming Session Created!")) {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
     } else {
-      interaction.react("💩");
-      return interaction.author.send(notice);
+      return interaction.followUp({ content: notice, ephemeral: true });
     }
     // } catch (e) {
     //   console.log(e);

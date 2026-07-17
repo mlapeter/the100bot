@@ -57,10 +57,7 @@ module.exports = {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
       interaction.reply("Gaming session created!");
     } else {
-      setTimeout(() => {
-        interaction.reply.delete();
-      }, 5000);
-      await interaction.reply(notice);
+      await interaction.reply({ content: notice, ephemeral: true });
     }
     // } catch (e) {
     //   console.log(e);

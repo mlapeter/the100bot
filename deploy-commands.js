@@ -22,11 +22,12 @@ const rest = new REST({ version: "10" }).setToken(token);
   try {
     console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-    // Register globally. To register faster to a single test guild while
-    // developing, swap for Routes.applicationGuildCommands(clientId, guildId).
-    const data = await rest.put(Routes.applicationCommands(clientId), { body: commands });
+    // With GUILD_ID set, register to that guild only (instant — use for dev).
+    // Without it, register globally (can take up to ~1 hour to propagate).
+    const route = guildId ? Routes.applicationGuildCommands(clientId, guildId) : Routes.applicationCommands(clientId);
+    const data = await rest.put(route, { body: commands });
 
-    console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+    console.log(`Successfully reloaded ${data.length} ${guildId ? `guild (${guildId})` : "global"} (/) commands.`);
   } catch (error) {
     console.error(error);
   }

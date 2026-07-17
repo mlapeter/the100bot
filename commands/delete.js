@@ -5,8 +5,8 @@ const api = new Api();
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("delete")
-    .setDescription("Create a new gaming session.")
-    .addStringOption((option) => option.setName("id").setDescription("The id of the game to delete")),
+    .setDescription("Delete a gaming session you created.")
+    .addStringOption((option) => option.setName("id").setDescription("The id of the game to delete").setRequired(true)),
 
   async execute(interaction) {
     const gaming_session_id = interaction.options.getString("id");
