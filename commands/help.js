@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageEmbed } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder().setName("help").setDescription("Get help using The100Bot"),
@@ -8,7 +7,7 @@ module.exports = {
 
     await interaction.reply("Help:");
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor("#0099ff")
       .setTitle("Hello from The100bot!")
       .setDescription(

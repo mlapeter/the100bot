@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder, ChannelType } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -20,7 +20,7 @@ module.exports = {
     }
 
     // return if user is in a DM channel
-    if (interaction.channel.type === "dm") {
+    if (interaction.channel?.type === ChannelType.DM) {
       return interaction.author.send(
         "Gaming sessions can only be created in public channels, but if you want to create a totally private gaming session you can use our website: <https://www.the100.io/gaming_sessions/new>."
       );
@@ -57,10 +57,7 @@ module.exports = {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
       interaction.reply("Gaming session created!");
     } else {
-      setTimeout(() => {
-        interaction.reply.delete();
-      }, 5000);
-      await interaction.reply(notice);
+      await interaction.reply({ content: notice, ephemeral: true });
     }
     // } catch (e) {
     //   console.log(e);

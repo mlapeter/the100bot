@@ -1,4 +1,4 @@
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, MessageType, PermissionsBitField } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -8,7 +8,7 @@ const discordApi = new DiscordApi();
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
     try {
-      if (!message.webhookId || message.type !== "DEFAULT") {
+      if (!message.webhookId || message.type !== MessageType.Default) {
         return;
       }
 
@@ -123,17 +123,17 @@ module.exports = (client) => {
 
         // check if we have permission to edit embeds
         const permissions = message.channel.permissionsFor(client.user);
-        if (!permissions.has("MANAGE_MESSAGES")) {
+        if (!permissions.has(PermissionsBitField.Flags.ManageMessages)) {
           console.log("NO MANAGE MESSAGES PERMISSION");
 
-          const embed = new MessageEmbed()
+          const embed = new EmbedBuilder()
             .setTitle("We've updated The100bot!")
             .setDescription(
               `You can now use buttons to join/leave games! But first you've got to re-add the bot from your group page with new permissions so we can edit embeds: https://www.the100.io`
             )
             .setColor("#ff0000");
 
-          await message.channel.send(message.content, { embed: embed });
+          await message.channel.send({ content: message.content, embeds: [embed] });
         } else {
           console.log("HAS EDIT PERMISSION, CREATING NEW EMBED FOR GAMING SESSION: " + gamingSessionId);
 

@@ -1,10 +1,9 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
 const chrono = require("chrono-node");
-const { MessageEmbed } = require("discord.js");
 const _ = require("lodash");
 
 module.exports = {
@@ -180,8 +179,7 @@ module.exports = {
     if (notice.includes("Gaming Session Created!")) {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
     } else {
-      interaction.react("💩");
-      return interaction.author.send(notice);
+      return interaction.followUp({ content: notice, ephemeral: true });
     }
     // } catch (e) {
     //   console.log(e);

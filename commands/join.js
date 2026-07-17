@@ -1,12 +1,12 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("join")
-    .setDescription("Create a new gaming session.")
-    .addStringOption((option) => option.setName("id").setDescription("The id of the game to join")),
+    .setDescription("Join a gaming session.")
+    .addStringOption((option) => option.setName("id").setDescription("The id of the game to join").setRequired(true)),
 
   async execute(interaction) {
     const gaming_session_id = interaction.options.getString("id");
@@ -26,7 +26,7 @@ module.exports = {
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Game Joined!", ephemeral: true });
     } else {
-      console.log("ERROR:");
+      console.log("JOIN ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });

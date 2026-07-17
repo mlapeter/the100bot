@@ -1,12 +1,12 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("delete")
-    .setDescription("Create a new gaming session.")
-    .addStringOption((option) => option.setName("id").setDescription("The id of the game to delete")),
+    .setDescription("Delete a gaming session you created.")
+    .addStringOption((option) => option.setName("id").setDescription("The id of the game to delete").setRequired(true)),
 
   async execute(interaction) {
     const gaming_session_id = interaction.options.getString("id");
@@ -22,7 +22,7 @@ module.exports = {
     if (substrings.some((v) => notice.includes(v))) {
       await interaction.reply({ content: "Gaming session deleted.", ephemeral: true });
     } else {
-      console.log("ERROR:");
+      console.log("DELETE ERROR:");
       console.log(notice);
       console.log(interaction);
       await interaction.reply({ content: notice, ephemeral: true });

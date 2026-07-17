@@ -1,8 +1,4 @@
-const { RichEmbed } = require("discord.js");
-// const fetch = require("node-fetch");
-// import fetch from 'node-fetch'
-
-const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+// Uses the global fetch built into Node 18+ (no node-fetch dependency needed).
 
 module.exports = class Api {
   async post(url, data) {
@@ -40,6 +36,9 @@ module.exports = class Api {
     };
 
     const res = await this.post(url, data);
+    console.log("RESPONSE:");
+    console.log(res);
+
     if (res.status == 404 || res.status == 401) {
       return interaction.reply(
         "Error: No The100.io group found. Go to <https://www.the100.io/groups/new> to re-add this bot from your group page."
