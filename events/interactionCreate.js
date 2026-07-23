@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -52,7 +52,10 @@ module.exports = {
       } else {
         console.log("interactionCreate.js ERROR:");
         console.log(notice);
-        await interaction.reply({ content: notice ? notice : "An error ocurred, please contact us.", ephemeral: true });
+        await interaction.reply({
+          content: notice ? notice : "An error ocurred, please contact us.",
+          flags: MessageFlags.Ephemeral,
+        });
       }
     } catch (error) {
       sendError(error, interaction);

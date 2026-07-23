@@ -4,6 +4,7 @@ const {
   Client,
   Collection,
   GatewayIntentBits,
+  MessageFlags,
   Partials,
   PermissionsBitField,
 } = require("discord.js");
@@ -101,21 +102,56 @@ const sendError = async (error, interaction) => {
     console.log("START SEND ERROR");
     console.error(error);
     const permissions = interaction.channel?.permissionsFor(client.user);
-    client.users.cache
-      .get(process.env.OWNER_DISCORD_ID)
-      ?.send(
-        `Error for command: **${interaction.commandName}** with proper permissions: **${permissions?.has(
-          PermissionsBitField.Flags.ManageMessages
-        )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
-          interaction.user
-        } - ${interaction.user?.id}`
-      );
 
-    client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
+    // Owner DM report. Best-effort: never let a failure here (e.g. owner
+    // has DMs closed, or client.users.cache miss) escape and crash the
+    // process -- these are report-only side effects, not user-facing.
+    try {
+      client.users.cache
+        .get(process.env.OWNER_DISCORD_ID)
+        ?.send(
+          `Error for command: **${interaction.commandName}** with proper permissions: **${permissions?.has(
+            PermissionsBitField.Flags.ManageMessages
+          )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
+            interaction.user
+          } - ${interaction.user?.id}`
+        );
 
-    await interaction.channel?.send(
-      "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
-    );
+      client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
+    } catch (ownerReportError) {
+      console.log("sendError OWNER REPORT ERROR: ");
+      console.log(ownerReportError);
+    }
+
+    // User-facing notice. The command's own execute() may have already
+    // deferred/replied to the interaction before it blew up (BOT-5), so a
+    // bare interaction.reply() here can itself throw (already
+    // acknowledged, or the interaction token already expired). Route
+    // through whichever response method matches the interaction's actual
+    // state, and fall back to a plain channel message if even that fails
+    // (e.g. token fully expired) rather than letting the error propagate.
+    const message =
+      "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6";
+    try {
+      if (interaction?.replied) {
+        await interaction.followUp({ content: message, flags: MessageFlags.Ephemeral });
+      } else if (interaction?.deferred) {
+        await interaction.editReply({ content: message });
+      } else if (typeof interaction?.reply === "function") {
+        await interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
+      } else {
+        await interaction.channel?.send(message);
+      }
+    } catch (replyError) {
+      console.log("sendError REPLY ERROR, falling back to channel.send: ");
+      console.log(replyError);
+      try {
+        await interaction.channel?.send(message);
+      } catch (channelSendError) {
+        console.log("sendError CHANNEL SEND ERROR: ");
+        console.log(channelSendError);
+      }
+    }
   } catch (e) {
     console.log("sendError ERROR: ");
     console.log(e);

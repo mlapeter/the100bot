@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -18,6 +18,12 @@ module.exports = {
     // console.log("VALUE:");
     // console.log(value);
 
+    // BOT-5: already deferred here pre-fix -- this command's execute path
+    // does several rails API round-trips, so this defer was correctly in
+    // place already. Left as non-ephemeral: the eventual outcome is a
+    // public gaming-session embed (channel.send), only the error followUp
+    // below needs to be ephemeral, and followUp can set that independently
+    // of the original defer.
     await interaction.deferReply();
 
     let game = interaction.options.getString("game");
@@ -179,7 +185,7 @@ module.exports = {
     if (notice.includes("Gaming Session Created!")) {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
     } else {
-      return interaction.followUp({ content: notice, ephemeral: true });
+      return interaction.followUp({ content: notice, flags: MessageFlags.Ephemeral });
     }
     // } catch (e) {
     //   console.log(e);
