@@ -1,23 +1,18 @@
 // Uses the global fetch built into Node 18+ (no node-fetch dependency needed).
 
-const { MessageFlags } = require("discord.js");
+const { respondToPrimary } = require("./interactionResponder");
 
 // Slash commands that hit this API defer their reply before calling
 // postAction (BOT-5), so by the time an error status comes back the
 // interaction is usually already deferred (occasionally already replied, if
 // an earlier step in the command sent something first). A bare
 // `interaction.reply(...)` here throws once the interaction has already been
-// acknowledged. Pick the response method that matches whatever state the
-// interaction is actually in.
+// acknowledged. respondToPrimary picks the response method that matches
+// whatever state the interaction is actually in -- see
+// utils/interactionResponder.js.
 const respondToInteraction = async (interaction, content) => {
   try {
-    if (interaction.replied) {
-      return await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
-    }
-    if (interaction.deferred) {
-      return await interaction.editReply({ content });
-    }
-    return await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    return await respondToPrimary(interaction, content);
   } catch (e) {
     console.log("respondToInteraction ERROR: ");
     console.log(e);

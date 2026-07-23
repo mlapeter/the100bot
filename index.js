@@ -4,7 +4,6 @@ const {
   Client,
   Collection,
   GatewayIntentBits,
-  MessageFlags,
   Partials,
   PermissionsBitField,
 } = require("discord.js");
@@ -15,6 +14,11 @@ const Api = require("./utils/api");
 const api = new Api();
 const DiscordApi = require("./utils/discordApi");
 const discordApi = new DiscordApi();
+// This handler only ever fires for slash commands (isChatInputCommand),
+// which all defer via deferReply -- so the single-deferred-placeholder
+// semantics of respondToPrimary are the right fit here. See
+// utils/interactionResponder.js.
+const { respondToPrimary } = require("./utils/interactionResponder");
 
 // Function-style event modules (module.exports = (client) => {...}). These are
 // wired explicitly below rather than through the events/ auto-loader, which
@@ -133,12 +137,8 @@ const sendError = async (error, interaction) => {
     const message =
       "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6";
     try {
-      if (interaction?.replied) {
-        await interaction.followUp({ content: message, flags: MessageFlags.Ephemeral });
-      } else if (interaction?.deferred) {
-        await interaction.editReply({ content: message });
-      } else if (typeof interaction?.reply === "function") {
-        await interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
+      if (typeof interaction?.reply === "function") {
+        await respondToPrimary(interaction, message);
       } else {
         await interaction.channel?.send(message);
       }
