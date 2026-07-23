@@ -1,5 +1,24 @@
 // Uses the global fetch built into Node 18+ (no node-fetch dependency needed).
 
+const { respondToPrimary } = require("./interactionResponder");
+
+// Slash commands that hit this API defer their reply before calling
+// postAction (BOT-5), so by the time an error status comes back the
+// interaction is usually already deferred (occasionally already replied, if
+// an earlier step in the command sent something first). A bare
+// `interaction.reply(...)` here throws once the interaction has already been
+// acknowledged. respondToPrimary picks the response method that matches
+// whatever state the interaction is actually in -- see
+// utils/interactionResponder.js.
+const respondToInteraction = async (interaction, content) => {
+  try {
+    return await respondToPrimary(interaction, content);
+  } catch (e) {
+    console.log("respondToInteraction ERROR: ");
+    console.log(e);
+  }
+};
+
 module.exports = class Api {
   async post(url, data) {
     console.log("LINK: ");
@@ -40,11 +59,13 @@ module.exports = class Api {
     console.log(res);
 
     if (res.status == 404 || res.status == 401) {
-      return interaction.reply(
+      return respondToInteraction(
+        interaction,
         "Error: No The100.io group found. Go to <https://www.the100.io/groups/new> to re-add this bot from your group page."
       );
     } else if (res.status !== 201) {
-      return interaction.reply(
+      return respondToInteraction(
+        interaction,
         "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help."
       );
     }
@@ -73,15 +94,17 @@ module.exports = class Api {
 
     const res = await this.post(url, data);
     if (res.status == 404) {
+      // Note: `ephemeral` is not a valid MessageCreateOptions field (this is
+      // a plain channel.send, not an interaction reply) -- it was a no-op.
+      // Dropped rather than "fixed" since a plain channel message can't be
+      // ephemeral at all.
       return msg.channel.send({
         content:
           "Error: No The100.io group found. Go to <https://www.the100.io> to re-add this bot from your group page.",
-        ephemeral: true,
       });
     } else if (res.status !== 201) {
       return msg.channel.send({
         content: "Error: Contact Us at: <https://www.the100.io/help> or: <https://discord.gg/FTDeeXA> for help.",
-        ephemeral: true,
       });
     }
     return await res.json();

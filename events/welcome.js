@@ -32,11 +32,29 @@ module.exports = (client) => {
   });
 
   // get all the members with manage server permissions
-  client.on("messageCreate", async (guild) => {
+  //
+  // BOT-1 root cause: this handler was wired to the "messageCreate" event
+  // while treating its callback argument as a Guild (naming it `guild` and
+  // calling `guild.members.cache`, copy-pasted from the guildCreate handler
+  // above). messageCreate's argument is a Message, which has no `.members`
+  // property at all -- so `guild.members` was always undefined and
+  // `.cache` threw "Cannot read properties of undefined (reading 'cache')"
+  // on literally every message the bot could see, including DMs (which
+  // also have no `.guild`). See DISCORD_BOT_ENGAGEMENT_PLAN.md BOT-1.
+  //
+  // Fix: this is clearly a "DM the admins when the bot joins a server"
+  // flow (matches the comment and the sibling handler above it), so it
+  // belongs on guildCreate, not on every message. That also removes an
+  // unintentional spam vector the crash had been accidentally masking
+  // (DMing every server admin on every single chat message). A defensive
+  // guard is kept in case a partial/unavailable guild object ever reaches
+  // here without a populated members cache.
+  client.on("guildCreate", async (guild) => {
     try {
       console.log("STARTING SENDING WELCOME DM TO MANAGERS");
 
-      // const guild = client.guilds.cache.get(process.env.GUILD_ID);
+      if (!guild?.members?.cache) return;
+
       const members = guild.members.cache.filter((member) =>
         member.permissions.has(PermissionsBitField.Flags.Administrator)
       );
@@ -53,7 +71,14 @@ module.exports = (client) => {
           .setThumbnail(client.user.avatarURL())
           .setTimestamp();
         console.log("SENDING WELCOME DM TO MANAGERS");
-        await member.send({ embeds: [embed] });
+        try {
+          await member.send({ embeds: [embed] });
+        } catch (e) {
+          // Member has DMs closed / blocked the bot -- not fatal, don't let
+          // one rejection inside this forEach take down the rest.
+          console.log("WELCOME DM ERROR (member likely has DMs closed): ");
+          console.log(e);
+        }
       });
     } catch (e) {
       console.log(e);

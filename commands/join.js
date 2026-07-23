@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 
@@ -9,6 +9,11 @@ module.exports = {
     .addStringOption((option) => option.setName("id").setDescription("The id of the game to join").setRequired(true)),
 
   async execute(interaction) {
+    // BOT-5: postAction round-trips to the rails API and can exceed the 3s
+    // interaction window. Every reply in this command was already
+    // ephemeral, so deferring ephemeral up front preserves that exactly.
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     const gaming_session_id = interaction.options.getString("id");
 
     let reserve = false;
@@ -24,12 +29,12 @@ module.exports = {
 
     const substrings = ["reserve", "waitlist", "You just joined"];
     if (substrings.some((v) => notice.includes(v))) {
-      await interaction.reply({ content: "Game Joined!", ephemeral: true });
+      await interaction.editReply({ content: "Game Joined!" });
     } else {
       console.log("JOIN ERROR:");
       console.log(notice);
       console.log(interaction);
-      await interaction.reply({ content: notice, ephemeral: true });
+      await interaction.editReply({ content: notice });
     }
   },
 };
