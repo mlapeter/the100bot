@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 
-const SUPPORT_INVITE = "https://discord.gg/EFRQxvUGM6";
+const SUPPORT_INVITE = "https://discord.gg/PSeRUMz";
 
 // Sends a welcome message when the bot is first added to a server.
 //

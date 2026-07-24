@@ -114,7 +114,7 @@ const sendError = async (error, interaction) => {
     client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
 
     await interaction.channel?.send(
-      "Sorry, something went wrong running that command. We've been notified — if you need a hand, reach us in our support server: https://discord.gg/EFRQxvUGM6"
+      "Sorry, something went wrong running that command. We've been notified — if you need a hand, reach us in our support server: https://discord.gg/PSeRUMz"
     );
   } catch (e) {
     console.log("sendError ERROR: ");
