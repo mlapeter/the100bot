@@ -1,8 +1,10 @@
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
+
+const SUPPORT_INVITE = "https://discord.gg/EFRQxvUGM6";
 
 module.exports = {
   name: "interactionCreate",
@@ -36,24 +38,24 @@ module.exports = {
         body: { gaming_session_id: gaming_session_id },
       });
 
+      // postReaction already messaged the channel on an API error.
+      if (!json) return;
+
       const { notice, gaming_session } = json;
 
-      // return if no gaming_session
+      // No updated session came back. This is the common "you're not linked yet"
+      // case (the API returns a link prompt as the notice) — surface it to just
+      // this user rather than silently doing nothing.
       if (!gaming_session) {
+        if (notice) {
+          await interaction.reply({ content: notice, flags: MessageFlags.Ephemeral });
+        }
         return;
       }
 
-      const substrings = ["reserve", "waitlist", "You just joined", "Game left"];
-      if (gaming_session || (notice && substrings.some((v) => notice.includes(v)))) {
-        const receivedEmbed = interaction.message.embeds[0];
-        const exampleEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
-        await interaction.update({ embeds: [exampleEmbed] });
-        return;
-      } else {
-        console.log("interactionCreate.js ERROR:");
-        console.log(notice);
-        await interaction.reply({ content: notice ? notice : "An error ocurred, please contact us.", ephemeral: true });
-      }
+      const receivedEmbed = interaction.message.embeds[0];
+      const updatedEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
+      await interaction.update({ embeds: [updatedEmbed] });
     } catch (error) {
       sendError(error, interaction);
     }
@@ -63,12 +65,11 @@ module.exports = {
 const sendError = async (error, interaction) => {
   try {
     console.error(error);
-    console.log(interaction);
     const permissions = interaction.channel?.permissionsFor(interaction.client.user);
     interaction.client.users.cache
       .get(process.env.OWNER_DISCORD_ID)
       ?.send(
-        `Error for command: **${interaction.customId}** with proper permissions: **${permissions?.has(
+        `Error for button: **${interaction.customId}** with proper permissions: **${permissions?.has(
           PermissionsBitField.Flags.ManageMessages
         )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
           interaction.user
@@ -78,7 +79,7 @@ const sendError = async (error, interaction) => {
     interaction.client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
 
     await interaction.channel?.send(
-      "There was an error while executing this command - the developers have been notified and you can also contact us in our support discord: https://discord.gg/EFRQxvUGM6"
+      `Sorry, something went wrong handling that. We've been notified — you can also reach us at ${SUPPORT_INVITE}.`
     );
   } catch (error) {
     console.error(error);

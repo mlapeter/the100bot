@@ -3,15 +3,16 @@ const Api = require("../utils/api");
 const api = new Api();
 
 module.exports = {
-  data: new SlashCommandBuilder().setName("the100status").setDescription("Check the status of the bot."),
+  data: new SlashCommandBuilder()
+    .setName("the100status")
+    .setDescription("Check that the bot and your group's webhook are connected."),
   async execute(interaction) {
-    console.log("STARTING STATUS");
-
-    await interaction.reply(`Online!`);
+    // Reply immediately (well under the 3s window), then fill in the details.
+    await interaction.reply("Checking your connection...");
 
     const json = await api.postAction({ action: "bot_status", interaction: interaction, body: {} });
-    console.log(json);
+    if (!json) return;
 
-    await interaction.editReply(`Online! ${json.text ? json.text : ""}`);
+    await interaction.editReply(json.text ? json.text : "I'm online! ✅");
   },
 };
