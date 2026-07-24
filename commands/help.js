@@ -8,7 +8,7 @@ module.exports = {
       .setTitle("the100.io bot — quick guide")
       .setDescription(
         "I help your server schedule gaming sessions without leaving Discord. Session posts get live **Join** / **Leave** buttons.\n" +
-          "[Visit the100.io](https://www.the100.io) · [Support server](https://discord.gg/EFRQxvUGM6)"
+          "[Visit the100.io](https://www.the100.io) · [Support server](https://discord.gg/PSeRUMz)"
       )
       .addFields(
         {

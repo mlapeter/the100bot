@@ -4,7 +4,7 @@ const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
 
-const SUPPORT_INVITE = "https://discord.gg/EFRQxvUGM6";
+const SUPPORT_INVITE = "https://discord.gg/PSeRUMz";
 
 module.exports = {
   name: "interactionCreate",

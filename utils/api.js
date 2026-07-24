@@ -1,6 +1,6 @@
 // Uses the global fetch built into Node 18+ (no node-fetch dependency needed).
 
-const SUPPORT_INVITE = "https://discord.gg/EFRQxvUGM6";
+const SUPPORT_INVITE = "https://discord.gg/PSeRUMz";
 
 // Reply to an interaction whether or not it has already been deferred/replied.
 // Slow commands call deferReply() first (so the token doesn't expire and show a
