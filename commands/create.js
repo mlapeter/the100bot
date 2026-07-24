@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
@@ -32,11 +32,15 @@ module.exports = {
     console.log("Selected Game: ");
     console.log(selectedGame);
 
+    // postAction returns null when the API errored (message already shown).
+    if (selectedGame === null) return;
+
     // CHECK IF USER HAS LINKED ACCOUNT //
     if (selectedGame && selectedGame.notice) {
       console.log("NOTICE:");
       console.log(selectedGame.notice);
-      return interaction.user.send(selectedGame.notice);
+      // Show the link prompt in the deferred reply so it doesn't hang on "thinking...".
+      return interaction.editReply(selectedGame.notice);
     }
 
     // USER INPUTS GAME STRING //
@@ -59,6 +63,7 @@ module.exports = {
 
     // USER SELECTS GAME //
     json = await api.postAction({ action: "find_games", interaction: interaction, body: { game: game } });
+    if (!json) return;
     const gamesEmbed = await discordApi.embedTextAndEmojis(
       interaction,
       "Select Game:",
@@ -86,6 +91,7 @@ module.exports = {
       interaction: interaction,
       body: { activity: "", game: selectedGame },
     });
+    if (!sampleActivities) return;
 
     const example1 = _.sample(sampleActivities.results.all_activities);
     const example2 = _.sample(sampleActivities.results.all_activities);
@@ -108,6 +114,7 @@ module.exports = {
       interaction: interaction,
       body: { activity: activity, game: selectedGame },
     });
+    if (!json) return;
 
     // USER SELECTS ACTIVITY //
     const activitiesEmbed = await discordApi.embedTextAndEmojis(
@@ -172,14 +179,17 @@ module.exports = {
       body: { game: selectedGame, message: createGameMessage, time: startTime, options: options },
     });
 
+    if (!createGameJson) return;
+
     // EMBED RETURNED GAMING SESSION //
     const { notice, gaming_session } = createGameJson;
     console.log("CREATE GAME JSON");
     console.log(createGameJson);
-    if (notice.includes("Gaming Session Created!")) {
+    if (notice && notice.includes("Gaming Session Created!")) {
       discordApi.embedGamingSessionWithReactions(interaction, gaming_session);
+      await interaction.editReply("Session created! 🎮 Use the **Join** button on the post to hop in.");
     } else {
-      return interaction.followUp({ content: notice, ephemeral: true });
+      return interaction.editReply({ content: notice });
     }
     // } catch (e) {
     //   console.log(e);

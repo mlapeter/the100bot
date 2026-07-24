@@ -81,6 +81,7 @@ module.exports = (client) => {
           user: existingEmbedMessage.author,
           body: {},
         });
+        if (!json) return;
         const { notice, gaming_session } = json;
 
         if (!gaming_session) {
@@ -127,11 +128,12 @@ module.exports = (client) => {
           console.log("NO MANAGE MESSAGES PERMISSION");
 
           const embed = new EmbedBuilder()
-            .setTitle("We've updated The100bot!")
+            .setTitle("One quick step to enable Join/Leave buttons")
             .setDescription(
-              `You can now use buttons to join/leave games! But first you've got to re-add the bot from your group page with new permissions so we can edit embeds: https://www.the100.io`
+              "Session posts can now include live **Join** and **Leave** buttons — but I need the **Manage Messages** permission to add them. " +
+                "A server admin can fix this in about a minute: open your group's **Edit** page on the100.io and click **Add the100.io Discord Bot** to re-add me with the updated permissions.\n\nhttps://www.the100.io"
             )
-            .setColor("#ff0000");
+            .setColor("#f0ad4e");
 
           await message.channel.send({ content: message.content, embeds: [embed] });
         } else {

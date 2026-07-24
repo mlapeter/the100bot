@@ -1,60 +1,50 @@
-const { PermissionsBitField, EmbedBuilder } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 
+const SUPPORT_INVITE = "https://discord.gg/EFRQxvUGM6";
+
+// Sends a welcome message when the bot is first added to a server.
+//
+// Note: the previous version of this file also registered a `messageCreate`
+// handler that tried to DM every server admin. It received the Message (not a
+// Guild) as its argument, so `message.members` was undefined and it threw
+// `Cannot read properties of undefined (reading 'cache')` on *every* message in
+// *every* channel (see BOT-1). It has been removed: the guildCreate greeting
+// below is the correct, non-spammy way to introduce the bot on join.
 module.exports = (client) => {
-  console.log("In Welcome.js");
-  // send a welcome message when bot is first added to the server
   client.on("guildCreate", async (guild) => {
     try {
-      const members = guild.members.cache.filter((member) =>
-        member.permissions.has(PermissionsBitField.Flags.Administrator)
-      );
-      console.log("MEMBERS:");
-      console.log(members);
+      // Post the greeting in a sensible starting channel: prefer #general, then
+      // the guild's configured system channel, then the first text channel we
+      // can actually send in.
+      const channel =
+        guild.channels.cache.find(
+          (c) => c.name === "general" && c.isTextBased?.() && c.permissionsFor(client.user)?.has("SendMessages")
+        ) ||
+        (guild.systemChannel && guild.systemChannel.permissionsFor(client.user)?.has("SendMessages")
+          ? guild.systemChannel
+          : null) ||
+        guild.channels.cache.find(
+          (c) => c.isTextBased?.() && c.permissionsFor(client.user)?.has("SendMessages")
+        );
 
-      const channel = guild.channels.cache.find((channel) => channel.name === "general");
       if (!channel) return;
+
       const embed = new EmbedBuilder()
         .setColor("#0099ff")
-        .setTitle("Hello from The100bot!")
+        .setTitle("Thanks for adding the100.io! 👋")
         .setDescription(
-          "The100bot lets you to easily schedule gaming sessions.\n\n" +
-            "To get started, just type `!c test event at 8pm`, try it out!\n\n" +
-            "For advanced options, type `!create`\n\n" +
-            "Or for help type `!help`\n\n" +
-            "If you have any questions, feel free to join the support server: https://discord.gg/dBZRVB9"
+          "I help your server schedule gaming sessions right here in Discord — and your session posts get live **Join** / **Leave** buttons.\n\n" +
+            "**Get started:**\n" +
+            "• `/c apex legends tonight at 8pm` — quickly create a session\n" +
+            "• `/create` — step-by-step session with more options\n" +
+            "• `/link` — connect your the100.io account (do this once so I can post as you)\n" +
+            "• `/games` — list your group's upcoming sessions\n" +
+            "• `/help` — see everything I can do\n\n" +
+            `Questions or something not working? Join our [support server](${SUPPORT_INVITE}).`
         )
         .setThumbnail(client.user.avatarURL());
-      console.log("SENDING WELCOME MESSAGE TO CHANNEL");
+
       await channel.send({ embeds: [embed] });
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  // get all the members with manage server permissions
-  client.on("messageCreate", async (guild) => {
-    try {
-      console.log("STARTING SENDING WELCOME DM TO MANAGERS");
-
-      // const guild = client.guilds.cache.get(process.env.GUILD_ID);
-      const members = guild.members.cache.filter((member) =>
-        member.permissions.has(PermissionsBitField.Flags.Administrator)
-      );
-      // send a direct message to each member with manage server permissions
-      members.forEach(async (member) => {
-        const embed = new EmbedBuilder()
-          .setColor("#0099ff")
-          .setTitle("Welcome to The100bot!")
-          .setDescription(
-            "The100bot is a Discord bot that allows you to interact with The100.io.\n\n" +
-              "To get started, use the `!help` command to see a list of commands.\n\n" +
-              "If you have any questions, feel free to join the support server: https://discord.gg/dBZRVB9"
-          )
-          .setThumbnail(client.user.avatarURL())
-          .setTimestamp();
-        console.log("SENDING WELCOME DM TO MANAGERS");
-        await member.send({ embeds: [embed] });
-      });
     } catch (e) {
       console.log(e);
     }
