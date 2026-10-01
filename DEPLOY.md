@@ -102,8 +102,9 @@ them as Heroku config vars. Every var referenced by the live code:
 |-----|----------|---------|
 | `DISCORD_BOT_TOKEN` | yes | Bot token from the Discord portal. Used for login and command registration. |
 | `CLIENT_ID` | yes (for deploy) | Application ID. Used by `deploy-commands.js` to register slash commands. |
-| `THE100_API_TOKEN` | yes | the100.io **user API token** sent as `Authorization: Bearer <token>` on every API call. Must belong to the dedicated bot user account (the one `User#is_the100bot?` returns true for) or an api-whitelisted account — see `pwntastic/app/controllers/api/v2/base_controller.rb#authenticate_bot_user`. Generate from that account's edit-profile page. |
+| `THE100_API_TOKEN` | yes | the100.io **user API token** sent as `Authorization: Bearer <token>` on every API call. Must belong to the dedicated bot user account (the one `User#is_the100bot?` returns true for, or a user id listed in pwntastic's `DISCORD_BOT_API_USER_IDS`). api-whitelisted accounts are no longer accepted — see `pwntastic/app/controllers/api/v2/base_controller.rb#authenticate_bot_user`. Generate from that account's edit-profile page. |
 | `THE100_API_BASE_URL` | yes | API base, **with trailing slash**, e.g. `https://www.the100.io/api/v2/` (prod) or `https://pwn-staging.herokuapp.com/api/v2/` (staging — note staging has no DB attached, see pwntastic CLAUDE.md). The bot posts to `${THE100_API_BASE_URL}discordbots/<action>`. |
+| `DISCORD_LINK_SECRET` | yes (for `/link`) | Shared secret for signing `/link` URLs (HMAC-SHA256). **Must equal pwntastic's `DISCORD_LINK_SECRET`.** Unset → `/link` replies that linking is unavailable. Generate with `openssl rand -hex 32`. |
 | `THE100_BASE_URL` | recommended | Web base **with trailing slash**, e.g. `https://www.the100.io/`. Used by `/help` / `/c` embeds and by `/link` to build the account-link URL (defaults to `https://www.the100.io/` if unset). |
 | `OWNER_DISCORD_ID` | optional | Discord user ID that receives DM error reports. Safe to leave unset (error DMs are best-effort / optional-chained). |
 | `GUILD_ID` | optional | Only for guild-scoped command registration during testing. |
@@ -132,7 +133,8 @@ Heroku steps to re-launch:
 heroku config:set -a the100bot \
   DISCORD_BOT_TOKEN=... CLIENT_ID=... \
   THE100_API_TOKEN=... THE100_API_BASE_URL=https://www.the100.io/api/v2/ \
-  THE100_BASE_URL=https://www.the100.io/ OWNER_DISCORD_ID=...
+  THE100_BASE_URL=https://www.the100.io/ OWNER_DISCORD_ID=... \
+  DISCORD_LINK_SECRET=...   # same value as on pwntastic
 git push production master
 heroku ps:scale worker=1 -a the100bot     # ensure the worker dyno is on
 heroku ps -a the100bot                     # confirm it's up
@@ -192,7 +194,8 @@ copies the stale ID later.
 
 ### The bot user account
 The API auth (`authenticate_bot_user`) requires `THE100_API_TOKEN` to belong to
-a user where `User#is_the100bot?` is true (or an api-whitelisted account). If
+a user where `User#is_the100bot?` is true, or whose id is listed in pwntastic's
+`DISCORD_BOT_API_USER_IDS` env (api-whitelisted accounts no longer pass). If
 the original bot user account still exists in prod, reuse its api token. If
 not, an account must be designated as the bot user and its token used. This is
 independent of the Discord application — it's the100.io-side identity.
