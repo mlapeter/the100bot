@@ -37,9 +37,9 @@ const GENERIC_ERROR_MESSAGE =
 
 module.exports = class Api {
   async post(url, data) {
-    console.log("LINK: ");
-    console.log(url);
-    console.log(data);
+    // One line per call: full bodies carry usernames and Discord ids, and they
+    // used to shrink the useful Heroku log window to ~13 hours.
+    console.log(`API POST ${url.split("/").pop()} guild=${data.guild_id} discord_id=${data.discord_id}`);
     let res = await fetch(url, {
       method: "POST",
       headers: {
@@ -52,11 +52,6 @@ module.exports = class Api {
   }
 
   async postAction({ action, interaction, body }) {
-    console.log("postAction: ");
-    console.log(action);
-    console.log("------------------------------------");
-    console.log(interaction.channelId);
-
     let url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
     let data = {
@@ -69,8 +64,6 @@ module.exports = class Api {
     };
 
     const res = await this.post(url, data);
-    console.log("RESPONSE:");
-    console.log(res.status);
 
     if (res.status == 404 || res.status == 401) {
       await replyOrEdit(interaction, NOT_LINKED_MESSAGE);
@@ -82,11 +75,11 @@ module.exports = class Api {
     return await res.json();
   }
 
-  async postReaction({ action, msg, user, body }) {
-    console.log("postAction: ");
-    console.log(action);
-    console.log("channel");
-    console.log(msg.channel.id);
+  // Button / webhook-refresh flavour of postAction. `notify` decides where an
+  // error message goes: button clicks pass an ephemeral follow-up (only the
+  // clicker sees it); the background webhook refresh passes nothing, so errors
+  // are just logged. Errors used to be posted publicly into the channel.
+  async postReaction({ action, msg, user, body, notify }) {
     const url = `${process.env.THE100_API_BASE_URL}discordbots/${action}`;
 
     const data = {
@@ -99,15 +92,14 @@ module.exports = class Api {
       ...body,
     };
 
-    console.log("BODY:");
-    console.log(data);
-
     const res = await this.post(url, data);
     if (res.status == 404 || res.status == 401) {
-      await msg.channel.send(NOT_LINKED_MESSAGE);
+      console.log(`${action}: API ${res.status}`);
+      if (notify) await notify(NOT_LINKED_MESSAGE);
       return null;
     } else if (res.status !== 201) {
-      await msg.channel.send(GENERIC_ERROR_MESSAGE);
+      console.log(`${action}: API ${res.status}`);
+      if (notify) await notify(GENERIC_ERROR_MESSAGE);
       return null;
     }
     return await res.json();

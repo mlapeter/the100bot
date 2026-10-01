@@ -4,6 +4,7 @@ const {
   Client,
   Collection,
   GatewayIntentBits,
+  MessageFlags,
   Partials,
   PermissionsBitField,
 } = require("discord.js");
@@ -101,26 +102,40 @@ const sendError = async (error, interaction) => {
     console.log("START SEND ERROR");
     console.error(error);
     const permissions = interaction.channel?.permissionsFor(client.user);
-    client.users.cache
-      .get(process.env.OWNER_DISCORD_ID)
-      ?.send(
-        `Error for command: **${interaction.commandName}** with proper permissions: **${permissions?.has(
-          PermissionsBitField.Flags.ManageMessages
-        )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
-          interaction.user
-        } - ${interaction.user?.id}`
-      );
+    if (process.env.OWNER_DISCORD_ID) {
+      // fetch, not cache.get: the owner is rarely cached, so DMs never arrived.
+      const owner = await client.users.fetch(process.env.OWNER_DISCORD_ID).catch(() => null);
+      await owner
+        ?.send(
+          `Error for command: **${interaction.commandName}** with proper permissions: **${permissions?.has(
+            PermissionsBitField.Flags.ManageMessages
+          )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
+            interaction.user
+          } - ${interaction.user?.id}\n${error}`
+        )
+        .catch(() => null);
+    }
 
-    client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
-
-    await interaction.channel?.send(
-      "Sorry, something went wrong running that command. We've been notified — if you need a hand, reach us in our support server: https://discord.gg/PSeRUMz"
-    );
+    // Only the person who ran the command sees this (it used to be posted
+    // publicly into the channel).
+    const content =
+      "Sorry, something went wrong running that command. We've been notified — if you need a hand, reach us in our support server: https://discord.gg/PSeRUMz";
+    if (interaction.deferred || interaction.replied) {
+      await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
+    } else {
+      await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    }
   } catch (e) {
     console.log("sendError ERROR: ");
     console.log(e);
   }
 };
+
+// Node 20 exits on an unhandled promise rejection, which takes the bot offline
+// until Heroku restarts it. Log it and keep running instead.
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
 
 client
   .login(process.env.DISCORD_BOT_TOKEN)

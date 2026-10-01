@@ -21,9 +21,8 @@ module.exports = (client) => {
         return;
       }
 
-      console.log(message);
+      console.log(`webhook post ${message.id} in guild ${message.guildId} channel ${message.channelId}`);
 
-      // console.log(message);
       // return if message does not need an embed with buttons
 
       // return if message has an embed with a title that contains "new group menber"
@@ -61,8 +60,7 @@ module.exports = (client) => {
         const guild = client.guilds.cache.find((guild) => guild.id === message.guildId);
         const channel = guild.channels.cache.find((channel) => channel.id === channelId);
         const existingEmbedMessage = await channel.messages.fetch(idStripped);
-        console.log("EXISTING EMBED MESSAGE:");
-        console.log(existingEmbedMessage);
+        console.log(`existing embed message: ${existingEmbedMessage?.id}`);
 
         // find the message in the channel with the id or return if not found
         if (!existingEmbedMessage) {
@@ -82,7 +80,7 @@ module.exports = (client) => {
           body: {},
         });
         if (!json) return;
-        const { notice, gaming_session } = json;
+        const { gaming_session } = json;
 
         if (!gaming_session) {
           console.log("NO GAMING SESSION FOUND");
@@ -90,9 +88,7 @@ module.exports = (client) => {
 
           return;
         } else {
-          console.log("GAMING SESSION FOUND");
-          console.log(gaming_session);
-          console.log(notice);
+          console.log(`gaming session found: ${gaming_session.id}`);
         }
 
         // update the message with the new embed
