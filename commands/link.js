@@ -31,7 +31,10 @@ const buildSignedLinkUrl = ({ baseUrl, secret, discordId, guildId, username, now
     sig,
     created_from: "discord-bot",
   });
-  return `${baseUrl}linkdiscord/${encodeURIComponent(discordId)}?${query.toString()}`;
+  // THE100_BASE_URL is set without a trailing slash on both Heroku apps; never
+  // glue the path straight onto the host ("the100.iolinkdiscord").
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return `${base}linkdiscord/${encodeURIComponent(discordId)}?${query.toString()}`;
 };
 
 module.exports = {
