@@ -3,6 +3,7 @@ const { RichEmbed } = require("discord.js");
 
 const _ = require("lodash");
 const Api = require("../../utils/api");
+const { siteUrl } = require("../../utils/utm");
 const api = new Api();
 const DiscordApi = require("../../utils/discordApi");
 const discordApi = new DiscordApi();
@@ -36,7 +37,8 @@ module.exports = class JoinCommand extends Command {
     try {
       if (msg.channel.type === "dm") {
         return msg.author.send(
-          "Gaming sessions can only be created in public channels, but if you want to create a totally private gaming session you can use our website: <https://www.the100.io/gaming_sessions/new>."
+          "Gaming sessions can only be created in public channels, but if you want to create a totally private gaming session you can use our website: " +
+            `<${siteUrl("gaming_sessions/new", "create_private")}>.`
         );
       }
 
