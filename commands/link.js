@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const { SlashCommandBuilder, MessageFlags } = require("discord.js");
+const { tagUrl } = require("../utils/utm");
 
 // Signed link to the100.io's /linkdiscord page. The site only links a Discord
 // account when the URL carries a valid signature from us, so nobody can craft
@@ -15,6 +16,9 @@ const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 //            linking auto-joins the user to that server's the100 group)
 //   ts       integer Unix seconds; the site rejects links older than 15 minutes
 //   nonce    random hex
+//
+// Only those four values are signed (DiscordLinkToken.verify reads nothing
+// else), so the utm_* tags added at the end don't affect verification.
 //
 // DISCORD_LINK_SECRET must be set to the same value on the100bot and pwntastic.
 const buildSignedLinkUrl = ({ baseUrl, secret, discordId, guildId, username, now = Date.now() }) => {
@@ -34,7 +38,7 @@ const buildSignedLinkUrl = ({ baseUrl, secret, discordId, guildId, username, now
   // THE100_BASE_URL is set without a trailing slash on both Heroku apps; never
   // glue the path straight onto the host ("the100.iolinkdiscord").
   const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-  return `${base}linkdiscord/${encodeURIComponent(discordId)}?${query.toString()}`;
+  return tagUrl(`${base}linkdiscord/${encodeURIComponent(discordId)}?${query.toString()}`, "link_account");
 };
 
 module.exports = {

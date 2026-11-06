@@ -3,6 +3,7 @@ const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
+const { siteUrl } = require("../utils/utm");
 const chrono = require("chrono-node");
 
 module.exports = {
@@ -28,7 +29,8 @@ module.exports = {
     if (interaction.channel?.type === ChannelType.DM) {
       return interaction.reply({
         content:
-          "I can only create sessions inside a server channel. To make a fully private session, use the website instead: <https://www.the100.io/gaming_sessions/new>.",
+          "I can only create sessions inside a server channel. To make a fully private session, use the website instead: " +
+          `<${siteUrl("gaming_sessions/new", "create_private")}>.`,
         flags: MessageFlags.Ephemeral,
       });
     }

@@ -1,5 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const Api = require("./api");
+const { siteUrl } = require("./utm");
 const api = new Api();
 
 // EmbedBuilder (v14) is stricter than the old MessageEmbed: setters reject
@@ -91,8 +92,7 @@ module.exports = class DiscordApi {
   }
 
   async helpEmbed(msg, title, description) {
-    const baseUrl = process.env.THE100_BASE_URL || "https://www.the100.io/";
-    const url = `${baseUrl.replace(/\/+$/, "")}/gaming_sessions/new`;
+    const url = siteUrl("gaming_sessions/new", "help");
 
     const embed = new EmbedBuilder()
       .setTitle("Create Events")
