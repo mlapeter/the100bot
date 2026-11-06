@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { siteUrl } = require("../utils/utm");
 
 module.exports = {
   data: new SlashCommandBuilder().setName("help").setDescription("See what the100.io bot can do."),
@@ -8,7 +9,7 @@ module.exports = {
       .setTitle("the100.io bot — quick guide")
       .setDescription(
         "I help your server schedule gaming sessions without leaving Discord. Session posts get live **Join** / **Leave** buttons.\n" +
-          "[Visit the100.io](https://www.the100.io) · [Support server](https://discord.gg/PSeRUMz)"
+          `[Visit the100.io](${siteUrl("", "help")}) · [Support server](https://discord.gg/PSeRUMz)`
       )
       .addFields(
         {

@@ -3,6 +3,7 @@ const Api = require("../utils/api");
 const api = new Api();
 const DiscordApi = require("../utils/discordApi");
 const discordApi = new DiscordApi();
+const { siteUrl } = require("../utils/utm");
 
 // listen for webhooks received from the100.io and log to console
 module.exports = (client) => {
@@ -127,7 +128,8 @@ module.exports = (client) => {
             .setTitle("One quick step to enable Join/Leave buttons")
             .setDescription(
               "Session posts can now include live **Join** and **Leave** buttons — but I need the **Manage Messages** permission to add them. " +
-                "A server admin can fix this in about a minute: open your group's **Edit** page on the100.io and click **Add the100.io Discord Bot** to re-add me with the updated permissions.\n\nhttps://www.the100.io"
+                "A server admin can fix this in about a minute: open your group's **Edit** page on the100.io and click **Add the100.io Discord Bot** to re-add me with the updated permissions.\n\n" +
+                siteUrl("", "bot_permissions")
             )
             .setColor("#f0ad4e");
 
