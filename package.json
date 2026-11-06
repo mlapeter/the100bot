@@ -4,7 +4,7 @@
   "description": "Official Discord Bot for The100.io",
   "main": "index.js",
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
