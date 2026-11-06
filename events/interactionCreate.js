@@ -6,14 +6,34 @@ const discordApi = new DiscordApi();
 
 const SUPPORT_INVITE = "https://discord.gg/PSeRUMz";
 
+// A message only the person who clicked can see. Works whether or not the
+// interaction has been acknowledged yet.
+const replyPrivately = async (interaction, content) => {
+  try {
+    if (interaction.deferred || interaction.replied) {
+      await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
+    } else {
+      await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    }
+  } catch (e) {
+    console.error("replyPrivately failed:", e);
+  }
+};
+
 module.exports = {
   name: "interactionCreate",
   async execute(interaction) {
+    if (!interaction.isButton()) return;
+
     try {
-      if (!interaction.isButton()) return;
-      console.log(
-        `${interaction.user.tag} in #${interaction.channel.name} triggered an interaction in interactionCreate.js.`
-      );
+      // Acknowledge inside Discord's 3-second window BEFORE calling the100.io.
+      // A join runs synchronous feed/webhook work in Rails and has taken 12s;
+      // without this Discord showed "This interaction failed" even though the
+      // join went through. After deferUpdate, editReply edits the session
+      // embed this button belongs to.
+      await interaction.deferUpdate();
+
+      console.log(`${interaction.user.tag} clicked ${interaction.customId} in #${interaction.channel?.name}`);
 
       let action = null;
 
@@ -22,13 +42,10 @@ module.exports = {
 
       if (interaction.customId.includes("join-")) {
         action = "join_gaming_session";
-        console.log("user joining game");
       } else if (interaction.customId.includes("leave-")) {
         action = "leave_gaming_session";
-        console.log("user leaving game");
       } else if (interaction.customId.includes("refresh-")) {
         action = "refresh_gaming_session";
-        console.log("refreshing game");
       }
 
       const json = await api.postReaction({
@@ -36,26 +53,25 @@ module.exports = {
         msg: interaction.message,
         user: interaction.user,
         body: { gaming_session_id: gaming_session_id },
+        notify: (content) => replyPrivately(interaction, content),
       });
 
-      // postReaction already messaged the channel on an API error.
+      // postReaction already told the clicker (privately) on an API error.
       if (!json) return;
 
       const { notice, gaming_session } = json;
 
       // No updated session came back. This is the common "you're not linked yet"
-      // case (the API returns a link prompt as the notice) — surface it to just
-      // this user rather than silently doing nothing.
+      // case (the API returns a signed link prompt as the notice) — surface it to
+      // just this user rather than silently doing nothing.
       if (!gaming_session) {
-        if (notice) {
-          await interaction.reply({ content: notice, flags: MessageFlags.Ephemeral });
-        }
+        if (notice) await replyPrivately(interaction, notice);
         return;
       }
 
       const receivedEmbed = interaction.message.embeds[0];
       const updatedEmbed = await discordApi.embedGamingSessionDynamic(gaming_session, receivedEmbed);
-      await interaction.update({ embeds: [updatedEmbed] });
+      await interaction.editReply({ embeds: [updatedEmbed] });
     } catch (error) {
       sendError(error, interaction);
     }
@@ -66,22 +82,26 @@ const sendError = async (error, interaction) => {
   try {
     console.error(error);
     const permissions = interaction.channel?.permissionsFor(interaction.client.user);
-    interaction.client.users.cache
-      .get(process.env.OWNER_DISCORD_ID)
-      ?.send(
-        `Error for button: **${interaction.customId}** with proper permissions: **${permissions?.has(
-          PermissionsBitField.Flags.ManageMessages
-        )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
-          interaction.user
-        } - ${interaction.user?.id}`
-      );
+    if (process.env.OWNER_DISCORD_ID) {
+      // fetch, not cache.get: the owner is rarely in the user cache, so the old
+      // cache lookup meant these DMs almost never arrived.
+      const owner = await interaction.client.users.fetch(process.env.OWNER_DISCORD_ID).catch(() => null);
+      await owner
+        ?.send(
+          `Error for button: **${interaction.customId}** with proper permissions: **${permissions?.has(
+            PermissionsBitField.Flags.ManageMessages
+          )}** in channel ${interaction.channel} in guild ${interaction.guild?.name} - ${interaction.guild} from user ${
+            interaction.user
+          } - ${interaction.user?.id}\n${error}`
+        )
+        .catch(() => null);
+    }
 
-    interaction.client.users.cache.get(process.env.OWNER_DISCORD_ID)?.send(error.toString());
-
-    await interaction.channel?.send(
+    await replyPrivately(
+      interaction,
       `Sorry, something went wrong handling that. We've been notified — you can also reach us at ${SUPPORT_INVITE}.`
     );
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    console.error(e);
   }
 };

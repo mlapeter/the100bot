@@ -92,7 +92,7 @@ module.exports = class DiscordApi {
 
   async helpEmbed(msg, title, description) {
     const baseUrl = process.env.THE100_BASE_URL || "https://www.the100.io/";
-    const url = `${baseUrl}gaming_sessions/new`;
+    const url = `${baseUrl.replace(/\/+$/, "")}/gaming_sessions/new`;
 
     const embed = new EmbedBuilder()
       .setTitle("Create Events")
